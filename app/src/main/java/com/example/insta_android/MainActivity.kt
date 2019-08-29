@@ -25,6 +25,7 @@ import android.graphics.BitmapFactory
 import android.widget.ImageView
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.media.ExifInterface
 import android.media.Image
 
 
@@ -100,6 +101,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     public override fun onActivityResult(reqCode: Int, resCode: Int, data: Intent?){
+
         setPic()
     }
 
@@ -123,12 +125,32 @@ class MainActivity : AppCompatActivity() {
             inJustDecodeBounds = false
             inSampleSize = scaleFactor
             inPurgeable = true
+
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
             galleryAddPic()
-            imageView.setImageBitmap(bitmap)
+
+            var ex = ExifInterface(currentPhotoPath)
+            var attr = ex.getAttribute(ExifInterface.TAG_ORIENTATION).toInt()
+            var rotatedBitmap:Bitmap = bitmap
+            if(attr == 6){
+                var matrix = Matrix()
+                matrix.postRotate((90).toFloat())
+                rotatedBitmap = Bitmap.createBitmap(
+                    bitmap,
+                    0,
+                    0,
+                    bitmap.getWidth(),
+                    bitmap.getHeight(),
+                    matrix,
+                    true
+                )
+            }
+
+            imageView.setImageBitmap(rotatedBitmap)
         }
     }
+
     private fun galleryAddPic() {
         Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
             val f = File(currentPhotoPath)
@@ -142,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
-    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
