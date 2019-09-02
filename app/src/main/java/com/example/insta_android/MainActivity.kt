@@ -25,20 +25,46 @@ import android.graphics.BitmapFactory
 import android.widget.ImageView
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.media.ExifInterface
-import android.media.Image
+import android.os.StrictMode
+import android.util.Log
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
+    private var locationManager : LocationManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
+
             dispatchTakePictureIntent()
         }
+        fab3.setOnClickListener(){
+            try {
+                // Request location updates
+                locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, locationListener);
+                toSend = true
+            } catch(ex: SecurityException) {
+                Log.d("myTag", "Security Exception, no location available");
+            }
+        }
+        // Create persistent LocationManager reference
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?;
+
         System.out.printf(">>>> path: %s\n",Environment.getExternalStorageDirectory().getPath().toString())
         val root = Environment.getExternalStorageDirectory().getPath().toString()
         val dir = File(root + "/INSTA")
@@ -50,7 +76,23 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+
+    var lat: Double = 0.0
+    var lng: Double = 0.0
+
+    //define the listener
+    private val locationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            lat = location.latitude
+            lng = location.longitude
+            sendPhoto()
+        }
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
     var currentPhotoPath: String = ""
+    var currentPhotoFilename: String = ""
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
@@ -66,6 +108,7 @@ class MainActivity : AppCompatActivity() {
         ).apply {
             // Save a file: path for use with ACTION_VIEW intents
             System.out.printf("path: %s \n",absolutePath)
+            currentPhotoFilename = absoluteFile.name
             currentPhotoPath = absolutePath
         }
     }
@@ -101,8 +144,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     public override fun onActivityResult(reqCode: Int, resCode: Int, data: Intent?){
-
         setPic()
+        var file = File(currentPhotoPath)
+        var data = file.readBytes()
+        System.out.printf("file: %s \npath: %s\n", currentPhotoFilename, currentPhotoPath)
+
+    }
+    public fun sendFile(){
+        sendPhoto()
     }
 
     private fun setPic() {
@@ -129,6 +178,8 @@ class MainActivity : AppCompatActivity() {
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
             galleryAddPic()
+            var file = File(currentPhotoPath)
+            var data = file.readBytes()
 
             var ex = ExifInterface(currentPhotoPath)
             var attr = ex.getAttribute(ExifInterface.TAG_ORIENTATION).toInt()
@@ -146,11 +197,40 @@ class MainActivity : AppCompatActivity() {
                     true
                 )
             }
-
             imageView.setImageBitmap(rotatedBitmap)
         }
     }
+    private var MEDIA_TYPE_JPEG = "image/jpeg".toMediaTypeOrNull();
 
+    var client = OkHttpClient()
+    var toSend = false
+    @Throws(IOException::class)
+    fun sendPhoto(){
+        if(toSend != true) { return }
+        var requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("photo[name]", currentPhotoFilename)
+            .addFormDataPart("photo[image]",currentPhotoFilename,
+                File(currentPhotoPath).asRequestBody(MEDIA_TYPE_JPEG)
+            )
+            .addFormDataPart("location[lat]", lat.toString())
+            .addFormDataPart("location[lng]", lng.toString())
+            .build()
+
+        var request = Request.Builder()
+            .url("http://kek.arslogi.ca:3001/photos")
+            .post(requestBody)
+            .build()
+        System.out.println("Gettting to send")
+        var req = client.newCall(request)
+        var response = req.execute()
+        response.use {
+            if (!it!!.isSuccessful) {
+                throw IOException("Unexpected code " + response)
+            }
+        }
+        toSend = false
+    }
     private fun galleryAddPic() {
         Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
             val f = File(currentPhotoPath)
