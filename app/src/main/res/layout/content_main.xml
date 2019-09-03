@@ -11,10 +11,15 @@
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="353dp"
-        android:layout_height="499dp"
-        app:srcCompat="@drawable/ic_launcher_background"
-        tools:layout_editor_absoluteX="42dp"
-        tools:layout_editor_absoluteY="88dp" />
+        android:layout_width="356dp"
+        android:layout_height="497dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="90dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

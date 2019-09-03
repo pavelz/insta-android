@@ -31,6 +31,7 @@ import android.location.LocationManager
 import android.media.ExifInterface
 import android.os.StrictMode
 import android.util.Log
+import com.example.insta_android.ui.login.LoginActivity
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -43,6 +44,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        try {
+            var k = Intent(this, LoginActivity::class.java)
+
+            startActivity(k);
+        } catch(e: Exception) {
+            e.printStackTrace();
+        }
         var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
