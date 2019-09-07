@@ -10,16 +10,24 @@ import okhttp3.Request
 import java.io.IOException
 import java.nio.charset.Charset
 
+class User {
+    fun User(){}
+    var id: Int = 0
+    var email: String = ""
+    var authentication_token: String = ""
+}
 /**
  * Class that handles authentication w/ login credentials and retrieves user information.
  */
 class LoginDataSource(var context: Context) {
     var client = OkHttpClient()
     private var moshi = Moshi.Builder().build()
-    private var gistJsonAdapter = moshi.adapter(Gist.class)
+    private var userJsonAdapter = moshi.adapter(User::class.java)
     fun login(username: String, password: String): Result<LoggedInUser> {
+        var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
+        var edit = preferences.edit()
+        var token = preferences.getString("auth_token","")
         print(">>>>>>>> Trying to LOGIN\n")
-        var a: AccountManager = AccountManager.get()
             // TODO: handle loggedInUser authentication
             print("body\n")
             var requestBody = FormBody.Builder()
@@ -38,7 +46,8 @@ class LoginDataSource(var context: Context) {
             print("start\n")
             var response = client.newCall(request).execute()
             print("called\n")
-            System.out.printf("response: %s\n", response.body!!.source().readString(Charset.defaultCharset()))
+            var response_text = response.body!!.source().readString(Charset.defaultCharset())
+            System.out.printf("response: %s\n", response_text)
             response.use {
                 if(!it!!.isSuccessful){
                     throw IOException("Unexpected code " + response)
@@ -46,10 +55,11 @@ class LoginDataSource(var context: Context) {
             }
             System.out.printf(">>> RESPONSE: %s\n", response)
 
-            var preferences = context.getSharedPreferences()
-            var edit = preferences.edit()
 
-            edit.putString("auth_token", "hello")
+            var jsonData = userJsonAdapter.fromJson(response_text)
+
+            edit.putString("auth_token", jsonData!!.authentication_token)
+            edit.commit()
 
             val user = LoggedInUser(java.util.UUID.randomUUID().toString(), username)
             return Result.Success(user)
@@ -57,6 +67,9 @@ class LoginDataSource(var context: Context) {
 
     fun logout() {
         // TODO: revoke authentication
+        var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
+        var edit = preferences.edit()
+        edit.remove("auth_token")
 
     }
 }
