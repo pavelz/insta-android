@@ -1,5 +1,6 @@
 package com.example.insta_android
 
+import android.Manifest
 import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -7,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Environment
@@ -29,14 +31,25 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.media.ExifInterface
 import android.os.StrictMode
+import android.support.v4.app.ActivityCompat
+import android.support.v4.app.JobIntentService
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
 import com.example.insta_android.ui.login.LoginActivity
+import com.example.insta_android.ImageLoader
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.*
 import java.lang.Exception
+import java.nio.charset.Charset
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.JsonAdapter
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 
 class MainActivity : AppCompatActivity() {
@@ -45,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var aBitmap: Bitmap
     var state:Bundle? = null
 
+    private val RSS_JOB_ID = 1000
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         state = savedInstanceState
@@ -54,8 +68,8 @@ class MainActivity : AppCompatActivity() {
         var edit = preferences.edit()
         var token = preferences.getString("auth_token","")
         System.out.printf("----------- TOKEN: %s \n", token)
-
-        if(token == ""){
+        requestPermissions()
+        if(token == "") {
             try {
                 var k = Intent(this, LoginActivity::class.java)
 
@@ -77,8 +91,16 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-
             dispatchTakePictureIntent()
+        }
+        intentTest.setOnClickListener(){
+            try {
+                var k = Intent(this, ImageLoader::class.java)
+                k.putExtra("dataString","https://google.com/")
+                startService(k)
+            } catch(e: Exception) {
+                e.printStackTrace()
+            }
         }
         fab3.setOnClickListener(){
             try {
@@ -102,6 +124,57 @@ class MainActivity : AppCompatActivity() {
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         }
+        var images = fetch_images("http://kek.arslogi.ca:3001/photos.json")
+        print("$images")
+
+        // TODO: sync all images from the site. compare list against waht you have and add new.
+        // TODO: load some images into image list on the device.
+
+    }
+    class Photo {
+        fun Photo(){}
+        var url: String = ""
+        var name: String = ""
+    }
+    class ArrayPhoto {
+        fun ArrayPhoto(){}
+        var photos: Array<Photo> = Array<Photo>(10){Photo()}
+    }
+
+    private var moshi = Moshi.Builder().build()
+    private var photoJsonAdapter = moshi.adapter(Photo::class.java)
+
+    fun load_images(images: List<Photo>?){
+        images!!.forEach {
+
+        }
+    }
+
+    fun fetch_images(url: String): List<Photo>? {
+        var str = arrayOf("")
+
+        print("request\n")
+        var request = Request.Builder()
+            .header("ContentType","application/json")
+            .header("Accept", "application/json")
+            .url(url)
+            .get()
+            .build()
+        var resp = client.newCall(request).execute()
+
+        resp.use {
+            if(!it!!.isSuccessful){
+                throw IOException("no images for u!")
+            }
+            var text = resp.body!!.source().readString(Charset.defaultCharset())
+
+            var ListType = Types.newParameterizedType(List::class.java, Photo::class.java)
+            var adapter: JsonAdapter<List<Photo>> = moshi.adapter(ListType)
+            var data:List<MainActivity.Photo>? = adapter.fromJson(text)
+            return data
+        }
+        var blank: List<Photo>? = List<Photo>(0){Photo()}
+        return  blank
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -112,6 +185,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun requestPermissions(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
+        }
+    }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         var path = savedInstanceState!!.getString("image_path")
@@ -150,6 +229,12 @@ class MainActivity : AppCompatActivity() {
         // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val root = Environment.getExternalStorageDirectory().getPath().toString()
+        try{
+            Files.createDirectory(Paths.get(root + "/INSTA"))
+        } catch(e: Exception){
+            System.out.println("---------> Beh sdasdas\n")
+        }
+
         val dir = File(root + "/INSTA")
         val storageDir: File = dir //getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
@@ -175,7 +260,7 @@ class MainActivity : AppCompatActivity() {
                     createImageFile()
                 } catch (ex: IOException) {
                     // Error occurred while creating the File
-                    System.out.println("Error filing")
+                    System.out.println(ex)
                         null
                 }
                 // Continue only if the File was successfully created

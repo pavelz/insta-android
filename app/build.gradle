@@ -31,6 +31,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-annotations:28.0.0'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'com.facebook.conceal:conceal:2.0.1@aar'
     implementation "com.squareup.moshi:moshi:1.8.0"
     testImplementation 'junit:junit:4.12'
