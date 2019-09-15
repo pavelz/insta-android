@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity() {
     fun requestPermissions(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET ), 0)
         }
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -204,7 +204,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if(currentPhotoPath != "") {
-            findViewById<View>(R.id.imageView2).post { setPic() }
+            //findViewById<View>(R.id.imageView2).post { setPic() }
+            findViewById<View>(R.id.imageView2).viewTreeObserver.addOnGlobalLayoutListener { println(">>> LAYOUT CALLBACK"); setPic() }
         }
     }
     var lat: Double = 0.0
