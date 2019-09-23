@@ -3,17 +3,14 @@ package com.example.insta_android
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
-import android.support.v4.content.FileProvider
+import androidx.core.content.FileProvider
 
 
 import kotlinx.android.synthetic.main.activity_main.*
@@ -24,20 +21,19 @@ import android.graphics.BitmapFactory
 import android.widget.ImageView
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.graphics.Picture
-import android.graphics.drawable.PictureDrawable
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.media.ExifInterface
 import android.os.StrictMode
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.JobIntentService
-import android.support.v4.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
-import com.example.insta_android.ImageLoader
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -48,7 +44,6 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.JsonAdapter
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 
 
@@ -88,7 +83,7 @@ class MainActivity : AppCompatActivity() {
         StrictMode.setThreadPolicy(policy)
 
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(toolbar as Toolbar?)
 
         fab.setOnClickListener { view ->
             dispatchTakePictureIntent()
@@ -113,7 +108,6 @@ class MainActivity : AppCompatActivity() {
         }
         // Create persistent LocationManager reference
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?;
-
         System.out.printf(">>>> path: %s\n",Environment.getExternalStorageDirectory().getPath().toString())
         val root = Environment.getExternalStorageDirectory().getPath().toString()
         val dir = File(root + "/INSTA")
@@ -126,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         }
         var images = fetch_images("http://kek.arslogi.ca:3001/photos.json")
         print("$images")
-
+        var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         // TODO: sync all images from the site. compare list against waht you have and add new.
         // TODO: load some images into image list on the device.
 
@@ -177,7 +171,7 @@ class MainActivity : AppCompatActivity() {
         return  blank
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if(currentPhotoPath != ""){
             outState!!.putString("image_path", currentPhotoPath)
