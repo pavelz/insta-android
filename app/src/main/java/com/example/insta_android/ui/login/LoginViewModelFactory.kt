@@ -1,11 +1,10 @@
 package com.example.insta_android.ui.login
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
 import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.insta_android.data.LoginDataSource
 import com.example.insta_android.data.LoginRepository
-import kotlin.coroutines.experimental.coroutineContext
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
