@@ -2,6 +2,8 @@ package com.example.insta_android.data
 
 import android.accounts.AccountManager
 import android.content.Context
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.example.insta_android.data.model.LoggedInUser
 import com.squareup.moshi.Moshi
 import okhttp3.FormBody
@@ -9,9 +11,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 import java.nio.charset.Charset
-
+@Entity
 class User {
     fun User(){}
+    @PrimaryKey
     var id: Int = 0
     var email: String = ""
     var authentication_token: String = ""

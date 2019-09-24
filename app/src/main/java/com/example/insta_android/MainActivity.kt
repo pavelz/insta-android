@@ -32,8 +32,12 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.room.Room
+import com.example.insta_android.data.AppDatabase
 import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
+import com.example.insta_android.data.model.Photo as PhotoD
+
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -124,15 +128,16 @@ class MainActivity : AppCompatActivity() {
         // TODO: sync all images from the site. compare list against waht you have and add new.
         // TODO: load some images into image list on the device.
 
+
     }
-    class Photo {
+    class Photo(s: String, s1: String) {
         fun Photo(){}
         var url: String = ""
         var name: String = ""
     }
     class ArrayPhoto {
         fun ArrayPhoto(){}
-        var photos: Array<Photo> = Array<Photo>(10){Photo()}
+        var photos: Array<Photo> = Array<Photo>(10){Photo("hello", "hi") }
     }
 
     private var moshi = Moshi.Builder().build()
@@ -167,7 +172,7 @@ class MainActivity : AppCompatActivity() {
             var data:List<MainActivity.Photo>? = adapter.fromJson(text)
             return data
         }
-        var blank: List<Photo>? = List<Photo>(0){Photo()}
+        var blank: List<Photo>? = List<Photo>(0){Photo("hello", "hi") }
         return  blank
     }
 
