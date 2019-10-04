@@ -71,9 +71,13 @@ class LoginDataSource(var context: Context) {
     fun logout() {
         // TODO: revoke authentication
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
+        var token = preferences.getString("auth_token","no-token")
+        System.out.printf("Token: %s \n", token)
+        System.out.printf("Token: %s \n", token)
         var edit = preferences.edit()
         edit.remove("auth_token")
-
+        edit.apply()
+        println("\n\nLOGGED OUT\n\n")
     }
 }
 
