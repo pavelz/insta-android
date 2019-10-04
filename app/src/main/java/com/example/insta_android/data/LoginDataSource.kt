@@ -62,6 +62,7 @@ class LoginDataSource(var context: Context) {
             var jsonData = userJsonAdapter.fromJson(response_text)
 
             edit.putString("auth_token", jsonData!!.authentication_token)
+            edit.putString("user_email", jsonData!!.email)
             edit.commit()
 
             val user = LoggedInUser(java.util.UUID.randomUUID().toString(), username)

@@ -21,7 +21,6 @@ class PhotoDataSource (var context:Context){
         db = AppDatabase.getDatabase(context)
         var photo = Photo( "hi")
         db!!.photoDao().insertAll(photo)
-
     }
     private fun loadPhotoFeed(){
         val feed = "http://kek.arslogi.ca:3000/photos.json"

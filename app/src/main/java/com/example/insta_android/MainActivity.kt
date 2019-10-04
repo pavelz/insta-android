@@ -66,13 +66,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         state = savedInstanceState
-
+        println(getResources().getText(R.string.dev))
 
         var context = this.applicationContext
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var edit = preferences.edit()
         var token = preferences.getString("auth_token","")
         System.out.printf("----------- TOKEN: %s \n", token)
+
         requestPermissions()
         if(token == "") {
             try {
@@ -119,7 +120,25 @@ class MainActivity : AppCompatActivity() {
         // Create persistent LocationManager reference
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?;
         System.out.printf(">>>> path: %s\n",Environment.getExternalStorageDirectory().getPath().toString())
+
+
+
+    }
+    // this is called when callback is returned.
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        println("ACCESS GRANTED")
         val root = Environment.getExternalStorageDirectory().getPath().toString()
+        try{
+            Files.createDirectory(Paths.get(root + "/INSTA"))
+        } catch(e: Exception){
+            System.out.printf("---------> %s\n", e)
+        }
+
         val dir = File(root + "/INSTA")
         dir.mkdirs()
         val outfile = File(dir, "FIle.txt")
@@ -131,7 +150,6 @@ class MainActivity : AppCompatActivity() {
         var images = fetch_images("http://kek.arslogi.ca:3001/photos.json")
         print("$images")
 
-        val root = Environment.getExternalStorageDirectory().getPath().toString()
         File(root + "/INSTA").walk().forEach {
             it.delete()
         }
@@ -142,7 +160,6 @@ class MainActivity : AppCompatActivity() {
         var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         // TODO: sync all images from the site. compare list against waht you have and add new.
         // TODO: load some images into image list on the device.
-
 
     }
     class Photo(s: String, s1: String) {
@@ -164,26 +181,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun load_image(url:String, name:String) : File{
+    fun load_image(url:String, name:String) : File?{
         var request = Request.Builder()
             .url(url)
             .get()
             .build()
         var resp = client.newCall(request).execute()
+        var file:File? = null
         resp.use{
             if(!it!!.isSuccessful){
                 throw IOException("no images for u!")
             }
 
             val root = Environment.getExternalStorageDirectory().getPath().toString()
+
             var dir = File(root + "/INSTA")
-            return File.createTempFile(
+
+            file = File.createTempFile(
                 name, /* prefix */
                 ".jpg", /* suffix */
                 dir /* directory */
             )
+            file!!.writeBytes(it.body!!.bytes())
         }
-
+        return file
     }
     fun fetch_images(url: String): List<Photo>? {
         var str = arrayOf("")
@@ -215,6 +236,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
         super.onSaveInstanceState(outState)
         if(currentPhotoPath != ""){
             outState!!.putString("image_path", currentPhotoPath)
@@ -253,7 +275,7 @@ class MainActivity : AppCompatActivity() {
     var lat: Double = 0.0
     var lng: Double = 0.0
 
-    //define the listener
+    //tedefine the listener
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             lat = location.latitude
@@ -387,8 +409,14 @@ class MainActivity : AppCompatActivity() {
     @Throws(IOException::class)
     fun sendPhoto(){
         if(toSend != true) { return }
+
+        var prefs = applicationContext.getSharedPreferences("insta", Context.MODE_PRIVATE)
+        var token = prefs.getString("auth_token","")
+        var email = prefs.getString("user_email","")
         var requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
+            .addFormDataPart("user_email", email)
+            .addFormDataPart("user_token", token)
             .addFormDataPart("photo[name]", currentPhotoFilename)
             .addFormDataPart("photo[image]",currentPhotoFilename,
                 File(currentPhotoPath).asRequestBody(MEDIA_TYPE_JPEG)
@@ -397,7 +425,9 @@ class MainActivity : AppCompatActivity() {
             .addFormDataPart("location[lng]", lng.toString())
             .build()
 
+
         var request = Request.Builder()
+
             .url("http://kek.arslogi.ca:3001/photos")
             .post(requestBody)
             .build()
