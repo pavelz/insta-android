@@ -32,10 +32,15 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.ViewModelProviders
 import androidx.room.Room
 import com.example.insta_android.data.AppDatabase
+import com.example.insta_android.data.LoginDataSource
+import com.example.insta_android.data.LoginRepository
 import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
+import com.example.insta_android.ui.login.LoginViewModel
+import com.example.insta_android.ui.login.LoginViewModelFactory
 import com.example.insta_android.data.model.Photo as PhotoD
 
 import okhttp3.*
@@ -61,6 +66,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         state = savedInstanceState
+
 
         var context = this.applicationContext
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
@@ -124,6 +130,15 @@ class MainActivity : AppCompatActivity() {
         }
         var images = fetch_images("http://kek.arslogi.ca:3001/photos.json")
         print("$images")
+
+        val root = Environment.getExternalStorageDirectory().getPath().toString()
+        File(root + "/INSTA").walk().forEach {
+            it.delete()
+        }
+        images!!.iterator().forEach {
+            System.out.printf("photo url: %s\n", it.url)
+            load_image("http://kek.arslogi.ca:3001/" + it.url, it.name)
+        }
         var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         // TODO: sync all images from the site. compare list against waht you have and add new.
         // TODO: load some images into image list on the device.
@@ -149,6 +164,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun load_image(url:String, name:String) : File{
+        var request = Request.Builder()
+            .url(url)
+            .get()
+            .build()
+        var resp = client.newCall(request).execute()
+        resp.use{
+            if(!it!!.isSuccessful){
+                throw IOException("no images for u!")
+            }
+
+            val root = Environment.getExternalStorageDirectory().getPath().toString()
+            var dir = File(root + "/INSTA")
+            return File.createTempFile(
+                name, /* prefix */
+                ".jpg", /* suffix */
+                dir /* directory */
+            )
+        }
+
+    }
     fun fetch_images(url: String): List<Photo>? {
         var str = arrayOf("")
 
@@ -170,8 +206,10 @@ class MainActivity : AppCompatActivity() {
             var ListType = Types.newParameterizedType(List::class.java, Photo::class.java)
             var adapter: JsonAdapter<List<Photo>> = moshi.adapter(ListType)
             var data:List<MainActivity.Photo>? = adapter.fromJson(text)
+            System.out.printf(">>>>>>>>>>>>>> TEXT: %s \n", text)
             return data
         }
+
         var blank: List<Photo>? = List<Photo>(0){Photo("hello", "hi") }
         return  blank
     }
@@ -192,12 +230,17 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
-        var path = savedInstanceState!!.getString("image_path")
-        System.out.printf("LOADED PATH: %s\n", path)
-        var file = File(path)
-        var data = file.readBytes()
-        currentPhotoPath = path
-        currentPhotoFilename = savedInstanceState!!.getString("image_filename")
+        println("LOADING RESTORE STATE")
+        if(savedInstanceState != null) {
+            var path = savedInstanceState!!.getString("image_path")
+            System.out.printf("LOADED PATH: %s\n", path)
+            if( path != null) {
+                var file = File(path)
+                var data = file.readBytes()
+                currentPhotoPath = path
+                currentPhotoFilename = savedInstanceState!!.getString("image_filename")
+            }
+        }
     }
 
     override fun onResume() {
@@ -388,6 +431,15 @@ class MainActivity : AppCompatActivity() {
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_settings -> true
+            R.id.action_logout -> {
+                var ls = LoginDataSource(applicationContext)
+                ls.logout()
+
+                var k = Intent(this, MainActivity::class.java)
+
+                startActivity(k)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
