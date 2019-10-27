@@ -1,4 +1,4 @@
-package com.example.insta_android
+package com.example.insta_android.ui.image_feed
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -8,6 +8,10 @@ import android.os.StrictMode
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.insta_android.MainActivity
+import com.example.insta_android.R
+import com.example.insta_android.data.PhotoDao
+import com.example.insta_android.data.PhotoDataSource
 import com.example.insta_android.databinding.ActivityMainBinding
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -22,7 +26,7 @@ import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class ImageFeedActivity: AppCompatActivity() {
+class PhotoFeedActivity: AppCompatActivity() {
 
     var client = OkHttpClient()
     private var moshi = Moshi.Builder().build()
@@ -41,7 +45,12 @@ class ImageFeedActivity: AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(
                 Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION ), 0)
-       }
+       } else {
+            val policy:StrictMode.ThreadPolicy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+            StrictMode.setThreadPolicy(policy)
+
+            val photoDataSource = PhotoDataSource(this)
+            photoDataSource.sync()        }
     }
 
     // this is called when callback is returned.
@@ -51,6 +60,10 @@ class ImageFeedActivity: AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        val photoDataSource = PhotoDataSource(this)
+        photoDataSource.sync()
+        return
+
         if(!( ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
             return
@@ -120,7 +133,7 @@ class ImageFeedActivity: AppCompatActivity() {
             .build()
         var resp = client.newCall(request).execute()
         var file:File? = null
-        resp.use{
+        resp.use {
             if(!it!!.isSuccessful){
                 throw IOException("no images for u!")
             }

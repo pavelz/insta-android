@@ -10,12 +10,12 @@ import android.icu.lang.UCharacter.GraphemeClusterBreak.V
 
 
 
-@Database(entities = arrayOf(Photo::class), version = 1)
+@Database(entities = arrayOf(Photo::class), version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun photoDao(): PhotoDao
 
     companion object {
-        val DATABASE_NAME = "photos5"
+        val DATABASE_NAME = "photos"
         var INSTANCE:AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase? {
 
