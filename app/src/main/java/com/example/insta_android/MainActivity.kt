@@ -58,7 +58,6 @@ import java.nio.file.Paths
 
 class MainActivity : AppCompatActivity() {
     private var locationManager : LocationManager? = null
-
     lateinit var aBitmap: Bitmap
     var state:Bundle? = null
 
@@ -100,13 +99,10 @@ class MainActivity : AppCompatActivity() {
             dispatchTakePictureIntent()
         }
         intentTest.setOnClickListener(){
-            try {
-                var k = Intent(this, ImageLoader::class.java)
-                k.putExtra("dataString","https://google.com/")
-                startService(k)
-            } catch(e: Exception) {
-                e.printStackTrace()
-            }
+            val intent = Intent()
+            intent.setType("image/*")
+            intent.setAction(Intent.ACTION_GET_CONTENT)
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
         fab3.setOnClickListener(){
             try {
@@ -315,6 +311,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     val REQUEST_TAKE_PHOTO = 1
+    val PICK_IMAGE = 2
     var photoUri: Uri? = null
     private fun dispatchTakePictureIntent() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
@@ -345,11 +342,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     public override fun onActivityResult(reqCode: Int, resCode: Int, data: Intent?){
-        setPic()
-        var file = File(currentPhotoPath)
-        var data = file.readBytes()
-        System.out.printf("file: %s \npath: %s\n", currentPhotoFilename, currentPhotoPath)
+        if(reqCode == PICK_IMAGE){
+            println("PICK CODE!")
+            println(data!!.data!!.path)
+            currentPhotoPath = data.data!!.path!!
+            val url = data.data!!
 
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, url)
+            val image = findViewById<ImageView>(R.id.imageView2)
+            val proj:Array<out String> = arrayOf(MediaStore.Images.Media.DATA )
+            val cursor = contentResolver.query(url, proj,null, null, null)
+            println(contentResolver.getType(url))
+            val fn = contentResolver.openFileDescriptor(url, "r")
+            val index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            println("WHAT   ")
+            if(cursor.moveToFirst()){
+                println("FOUND SOMETHING!!")
+                println(cursor.getString(index))
+                if(cursor.getString(index) == null) {
+                    // its a file ?
+
+                }
+            }
+
+            image.setImageBitmap(bitmap)
+        }else if(reqCode == REQUEST_TAKE_PHOTO) {
+            setPic()
+            var file = File(currentPhotoPath)
+            var data = file.readBytes()
+            System.out.printf("file: %s \npath: %s\n", currentPhotoFilename, currentPhotoPath)
+        }
     }
     public fun sendFile(){
         sendPhoto()
@@ -380,7 +402,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
-            galleryAddPic()
+            //galleryAddPic()
 
             var ex = ExifInterface(currentPhotoPath)
             var attr = ex.getAttribute(ExifInterface.TAG_ORIENTATION).toInt()
