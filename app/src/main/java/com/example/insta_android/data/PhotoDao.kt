@@ -18,6 +18,9 @@ interface PhotoDao {
              " LIMIT 1")
     fun findByFileName(file: String): Photo
 
+    @Query("DELETE from photos")
+    fun deleteAll()
+
     @Insert
     fun insertAll(vararg photos: Photo)
 
