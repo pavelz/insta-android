@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
@@ -25,7 +26,9 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.media.ExifInterface
+import android.os.ParcelFileDescriptor
 import android.os.StrictMode
+import android.provider.DocumentsContract
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import android.util.Log
@@ -41,6 +44,7 @@ import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
 import com.example.insta_android.ui.login.LoginViewModel
 import com.example.insta_android.ui.login.LoginViewModelFactory
+import com.querydsl.core.util.FileUtils
 import com.example.insta_android.data.model.Photo as PhotoD
 
 import okhttp3.*
@@ -284,6 +288,8 @@ class MainActivity : AppCompatActivity() {
     }
     var currentPhotoPath: String = ""
     var currentPhotoFilename: String = ""
+    var currentPhotoUri:Uri? = null
+
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
@@ -341,21 +347,52 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    fun getPath(context: Context, uri: Uri): String? {
+        if ("content".equals(uri.scheme!!, ignoreCase = true)) {
+            val projection = arrayOf("_data")
+            var cursor: Cursor? = null
+
+            try {
+                cursor = context.contentResolver.query(uri, projection, null, null, null)
+                val column_inde = cursor!!.getColumnIndexOrThrow("_data")
+                if (cursor.moveToFirst()) {
+                    return cursor.getString(column_index)
+                }
+            } catch (e: Exception) {
+                // Eat it
+            }
+
+        } else if ("file".equals(uri.scheme!!, ignoreCase = true)) {
+            return uri.path
+        }
+
+        return null
+    }
+
     public override fun onActivityResult(reqCode: Int, resCode: Int, data: Intent?){
         if(reqCode == PICK_IMAGE){
             println("PICK CODE!")
             println(data!!.data!!.path)
             currentPhotoPath = data.data!!.path!!
             val url = data.data!!
+            val a = DocumentsContract.getDocumentId(url)
+            println(a)
+            println(url.scheme)
+            println(url.path)
+            val aPath = getPath(this, url)
+            println(aPath)
+            var p = contentResolver.openFileDescriptor(url,"r")
+            var fd = p.fileDescriptor
 
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, url)
             val image = findViewById<ImageView>(R.id.imageView2)
-            val proj:Array<out String> = arrayOf(MediaStore.Images.Media.DATA )
+            val proj:Array<out String> = arrayOf(MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME )
             val cursor = contentResolver.query(url, proj,null, null, null)
             println(contentResolver.getType(url))
             val fn = contentResolver.openFileDescriptor(url, "r")
-            val index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-            println("WHAT   ")
+            val index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+            println("WHAT")
             if(cursor.moveToFirst()){
                 println("FOUND SOMETHING!!")
                 println(cursor.getString(index))
@@ -435,6 +472,8 @@ class MainActivity : AppCompatActivity() {
         var prefs = applicationContext.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var token = prefs.getString("auth_token","")
         var email = prefs.getString("user_email","")
+        var file:File? = null
+
         var requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("user_email", email)
