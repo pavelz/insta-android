@@ -1,6 +1,8 @@
 package com.example.insta_android.ui.image_feed
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
@@ -13,6 +15,7 @@ import com.example.insta_android.R
 import com.example.insta_android.data.PhotoDao
 import com.example.insta_android.data.PhotoDataSource
 import com.example.insta_android.databinding.ActivityMainBinding
+import com.example.insta_android.ui.login.LoginActivity
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -36,6 +39,24 @@ class PhotoFeedActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // TODO: carry all image feed load here from main activity
         setContentView(R.layout.image_feed)
+        var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        var context = this.applicationContext
+        var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
+        var edit = preferences.edit()
+        var token = preferences.getString("auth_token","")
+        System.out.printf("----------- TOKEN: %s \n", token)
+
+        requestPermissions()
+        if(token == "") {
+            try {
+                var k = Intent(this, LoginActivity::class.java)
+
+                startActivity(k)
+            } catch(e: Exception) {
+                e.printStackTrace()
+            }
+        }
         requestPermissions()
     }
     private fun requestPermissions(){
@@ -49,8 +70,9 @@ class PhotoFeedActivity: AppCompatActivity() {
             val policy:StrictMode.ThreadPolicy = StrictMode.ThreadPolicy.Builder().permitAll().build()
             StrictMode.setThreadPolicy(policy)
 
-            val photoDataSource = PhotoDataSource(this)
-            photoDataSource.sync()        }
+            val photoDataSource = PhotoDataSource(this.applicationContext)
+            photoDataSource.sync()
+        }
     }
 
     // this is called when callback is returned.
@@ -60,7 +82,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        val photoDataSource = PhotoDataSource(this)
+        val photoDataSource = PhotoDataSource(this.applicationContext)
         photoDataSource.sync()
         return
 
@@ -104,6 +126,8 @@ class PhotoFeedActivity: AppCompatActivity() {
     }
     fun fetch_images(url: String): List<MainActivity.Photo>? {
         var str = arrayOf("")
+        var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
 
         print("request\n")
         var request = Request.Builder()

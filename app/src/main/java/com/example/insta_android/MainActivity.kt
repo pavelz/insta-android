@@ -102,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             dispatchTakePictureIntent()
         }
+
         intentTest.setOnClickListener(){
             val intent = Intent()
             intent.setType("image/*")
@@ -348,28 +349,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun getPath(context: Context, uri: Uri): String? {
-        if ("content".equals(uri.scheme!!, ignoreCase = true)) {
-            val projection = arrayOf("_data")
-            var cursor: Cursor? = null
-
-            try {
-                cursor = context.contentResolver.query(uri, projection, null, null, null)
-                val column_inde = cursor!!.getColumnIndexOrThrow("_data")
-                if (cursor.moveToFirst()) {
-                    return cursor.getString(column_index)
-                }
-            } catch (e: Exception) {
-                // Eat it
-            }
-
-        } else if ("file".equals(uri.scheme!!, ignoreCase = true)) {
-            return uri.path
-        }
-
-        return null
-    }
-
     public override fun onActivityResult(reqCode: Int, resCode: Int, data: Intent?){
         if(reqCode == PICK_IMAGE){
             println("PICK CODE!")
@@ -380,10 +359,6 @@ class MainActivity : AppCompatActivity() {
             println(a)
             println(url.scheme)
             println(url.path)
-            val aPath = getPath(this, url)
-            println(aPath)
-            var p = contentResolver.openFileDescriptor(url,"r")
-            var fd = p.fileDescriptor
 
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, url)
             val image = findViewById<ImageView>(R.id.imageView2)

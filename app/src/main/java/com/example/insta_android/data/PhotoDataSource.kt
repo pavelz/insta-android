@@ -5,8 +5,10 @@ import okhttp3.*
 
 import java.io.IOException
 import android.content.Context
+import android.os.StrictMode
 import com.example.insta_android.MainActivity
 import com.example.insta_android.R
+import com.querydsl.sql.types.StringAsObjectType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -29,8 +31,15 @@ class PhotoDataSource (var context:Context){
     fun fetch_images(url: String): List<PhotoJson>? {
         var str = arrayOf("")
 
+        var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
+        var token = preferences.getString("auth_token","")
+        var email = preferences.getString("user_email","")
+        System.out.printf("%s %s\n", token, email)
+
         print("request\n")
         var request = Request.Builder()
+            .header("X-User-Email", email)
+                .header("X-User-Token", token)
             .header("ContentType","application/json")
             .header("Accept", "application/json")
             .url(url)
@@ -71,6 +80,9 @@ class PhotoDataSource (var context:Context){
         val photoStream =
             "http://" + context.resources.getString(R.string.production) + ":3001/photos.json"
 
+        var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
 
         db = AppDatabase.getDatabase(context)
         db!!.photoDao().deleteAll()
@@ -80,10 +92,33 @@ class PhotoDataSource (var context:Context){
             val photo = Photo(it.url!!, it.name!!,"")
             db!!.photoDao().insertAll(photo)
             // TODO load the image too. from the link
+            // hmm
 
         }
 
     }
+
+    private fun loadPhoto(url:String){
+        var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
+        var token = preferences.getString("auth_token","")
+        var email = preferences.getString("user_email","")
+
+        var request = Request.Builder()
+            .header("X-User-Email", email)
+            .header("X-User-Token", token)
+            .url(url)
+            .get()
+            .build()
+
+        var client = OkHttpClient()
+        var response = client.newCall(request).execute()
+        response.use{
+            if(!it!!.isSuccessful){
+                throw IOException("Failed to load the image $url")
+            }
+        }
+    }
+
     private fun loadPhotoFeed(){
         val feed = "http://kek.arslogi.ca:3000/photos.json"
 
