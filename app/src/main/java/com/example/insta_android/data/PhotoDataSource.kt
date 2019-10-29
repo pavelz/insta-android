@@ -102,7 +102,7 @@ class PhotoDataSource (var context:Context){
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var token = preferences.getString("auth_token","")
         var email = preferences.getString("user_email","")
-
+        System.out.printf("%s %s \n", token, email)
         var request = Request.Builder()
             .header("X-User-Email", email)
             .header("X-User-Token", token)
