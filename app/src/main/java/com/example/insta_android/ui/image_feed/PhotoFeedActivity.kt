@@ -10,6 +10,7 @@ import android.os.StrictMode
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.insta_android.Config
 import com.example.insta_android.MainActivity
 import com.example.insta_android.R
 import com.example.insta_android.data.PhotoDao
@@ -38,25 +39,42 @@ class PhotoFeedActivity: AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         // TODO: carry all image feed load here from main activity
+        Config.Code(applicationContext)
+
         setContentView(R.layout.image_feed)
-        var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
+
         var context = this.applicationContext
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var edit = preferences.edit()
         var token = preferences.getString("auth_token","")
         System.out.printf("----------- TOKEN: %s \n", token)
 
-        requestPermissions()
-        if(token == "") {
+        if(token == "" || token == null) {
             try {
                 var k = Intent(this, LoginActivity::class.java)
 
-                startActivity(k)
+                startActivityForResult(k,1)
             } catch(e: Exception) {
                 e.printStackTrace()
             }
+        } else {
+            val root = Environment.getExternalStorageDirectory().getPath().toString()
+            try{
+                Files.createDirectory(Paths.get(root + "/INSTA"))
+            } catch(e: java.lang.Exception){
+                System.out.printf("---------> %s\n", e)
+            }
+            val photoDataSource = PhotoDataSource(this.applicationContext)
+            photoDataSource.sync()
         }
+
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        println("ACTIVITY RESULT!!!")
+        var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
         requestPermissions()
     }
     private fun requestPermissions(){
@@ -66,13 +84,7 @@ class PhotoFeedActivity: AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(
                 Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION ), 0)
-       } else {
-            val policy:StrictMode.ThreadPolicy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-            StrictMode.setThreadPolicy(policy)
-
-            val photoDataSource = PhotoDataSource(this.applicationContext)
-            photoDataSource.sync()
-        }
+       }
     }
 
     // this is called when callback is returned.
@@ -81,6 +93,15 @@ class PhotoFeedActivity: AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        println("ON PERMISIONS\n--------------------------------\n")
+
+        val root = Environment.getExternalStorageDirectory().getPath().toString()
+        try{
+            Files.createDirectory(Paths.get(root + "/INSTA"))
+        } catch(e: java.lang.Exception){
+            System.out.printf("---------> %s\n", e)
+        }
+        println("*** dir created at $root /INSTA")
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val photoDataSource = PhotoDataSource(this.applicationContext)
         photoDataSource.sync()
@@ -91,7 +112,6 @@ class PhotoFeedActivity: AppCompatActivity() {
             return
         }
         println("ACCESS GRANTED")
-        val root = Environment.getExternalStorageDirectory().getPath().toString()
         try{
             Files.createDirectory(Paths.get(root + "/INSTA"))
         } catch(e: Exception){

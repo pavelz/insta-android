@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dev">192.168.1.61</string>
+    <string name="env">dev</string>
+    <string name="dev">10.0.2.2</string>
     <string name="production">kek.arslogi.ca</string>
+    <string name="phone_dev">192.168.1.61</string>
 </resources>

@@ -4,6 +4,7 @@ import android.accounts.AccountManager
 import android.content.Context
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.insta_android.Config
 import com.example.insta_android.data.model.LoggedInUser
 import com.squareup.moshi.Moshi
 import okhttp3.FormBody
@@ -39,10 +40,11 @@ class LoginDataSource(var context: Context) {
                 .build()
 
             print("request\n")
+
             var request = Request.Builder()
                 .header("ContentType","application/json")
                 .header("Accept", "application/json")
-                .url("http://kek.arslogi.ca:3001/users/sign_in")
+                .url(Config.serverURL() + "/users/sign_in")
                 .post(requestBody)
                 .build()
 

@@ -5,12 +5,14 @@
     <data>
         <variable name="foo" type="int"/>
     </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:accessibilityHeading="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:showIn="@layout/activity_main"
-        tools:context=".MainActivity">
+        tools:context=".MainActivity"
+        tools:showIn="@layout/activity_main">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/imageView2"
