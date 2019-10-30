@@ -69,7 +69,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         state = savedInstanceState
-        println(getResources().getText(R.string.dev))
+        Config.Code(applicationContext)
+        val url = Config.serverURL()
+        println("################# URL")
+        println(url)
 
         var context = this.applicationContext
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
@@ -148,7 +151,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         }
-        var images = fetch_images("http://kek.arslogi.ca:3001/photos.json")
+        var images = fetch_images(serverURL() + "/photos.json")
         print("$images")
 
         File(root + "/INSTA").walk().forEach {
@@ -156,7 +159,7 @@ class MainActivity : AppCompatActivity() {
         }
         images!!.iterator().forEach {
             System.out.printf("photo url: %s\n", it.url)
-            load_image("http://kek.arslogi.ca:3001/" + it.url, it.name)
+            load_image("http://10.0.2.2:3001/" + it.url, it.name)
         }
         var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         // TODO: sync all images from the site. compare list against waht you have and add new.
@@ -237,7 +240,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         super.onSaveInstanceState(outState)
         if(currentPhotoPath != ""){
             outState!!.putString("image_path", currentPhotoPath)
@@ -350,6 +352,7 @@ class MainActivity : AppCompatActivity() {
 
 
     public override fun onActivityResult(reqCode: Int, resCode: Int, data: Intent?){
+        super.onActivityResult(reqCode, resCode, data)
         if(reqCode == PICK_IMAGE){
             println("PICK CODE!")
             println(data!!.data!!.path)
@@ -436,6 +439,18 @@ class MainActivity : AppCompatActivity() {
             imageView.setImageBitmap(rotatedBitmap)
         }
     }
+    private fun serverURL():String{
+        val context = this.applicationContext
+        return when (context.getString(R.string.env)) {
+            "dev" ->
+                "http://" + context.getString(R.string.dev) + ":3001"
+            "production" ->
+                "http://" + context.getString(R.string.production) + ":3001"
+            else ->
+                "http://" + context.getString(R.string.production) + ":3001"
+        }
+    }
+
     private var MEDIA_TYPE_JPEG = "image/jpeg".toMediaTypeOrNull();
 
     var client = OkHttpClient()
@@ -464,7 +479,7 @@ class MainActivity : AppCompatActivity() {
 
         var request = Request.Builder()
 
-            .url("http://kek.arslogi.ca:3001/photos")
+            .url( serverURL() + "/photos")
             .post(requestBody)
             .build()
         System.out.println("Gettting to send")
