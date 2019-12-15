@@ -482,7 +482,6 @@ class MainActivity : AppCompatActivity() {
         println("CURRRENT PHOTO PATH: ${currentPhotoPath}")
         var photoFile:File?
         if(currentImageInputStream != null){
-            //photoFile = currentImageInputStream.readBytes()
             file = convertStreamToFile(currentImageInputStream!!)
         } else {
             file = File(currentPhotoPath)

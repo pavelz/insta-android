@@ -16,6 +16,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import java.io.File
+import java.lang.Exception
 import java.nio.charset.Charset
 import java.util.*
 
@@ -102,10 +103,13 @@ class PhotoDataSource (var context:Context){
         val root = Environment.getExternalStorageDirectory().getPath().toString()
         images!!.forEach {
             println(it.filename)
-
+            println(it)
             val write = File(root + "/INSTA/" + it.filename)
-
-            write.writeBytes(Base64.getDecoder().decode(it.image))
+            try {
+                write.writeBytes(Base64.getMimeDecoder().decode(it.image))
+            }catch(e: Exception){
+                println("image ${it.filename} is not readable ${e}.")
+            }
         }
 //        images!!.forEach {
 //            val photo = Photo(it.url!! , it.name!! , "")
