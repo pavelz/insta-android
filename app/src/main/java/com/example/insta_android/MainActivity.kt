@@ -37,6 +37,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProviders
 import androidx.room.Room
+import com.example.insta_android.Config.Code.context
 import com.example.insta_android.data.AppDatabase
 import com.example.insta_android.data.LoginDataSource
 import com.example.insta_android.data.LoginRepository
@@ -56,11 +57,13 @@ import java.nio.charset.Charset
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.JsonAdapter
+import org.apache.commons.io.IOUtils
 import java.nio.file.Files
 import java.nio.file.Paths
 
 
 class MainActivity : AppCompatActivity() {
+    private var currentImageInputStream: InputStream? = null
     private var locationManager : LocationManager? = null
     lateinit var aBitmap: Bitmap
     var state:Bundle? = null
@@ -113,6 +116,7 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
         fab3.setOnClickListener(){
+            println("new")
             try {
                 // Request location updates
                 locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, locationListener);
@@ -369,11 +373,15 @@ class MainActivity : AppCompatActivity() {
             val cursor = contentResolver.query(url, proj,null, null, null)
             println(contentResolver.getType(url))
             val fn = contentResolver.openFileDescriptor(url, "r")
-            val index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-            println("WHAT")
+            val index = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+            currentImageInputStream = context!!.contentResolver.openInputStream(data.data!!)
+
+
             if(cursor.moveToFirst()){
                 println("FOUND SOMETHING!!")
                 println(cursor.getString(index))
+                currentPhotoFilename = cursor.getString(index)
+
                 if(cursor.getString(index) == null) {
                     // its a file ?
 
@@ -440,14 +448,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun serverURL():String{
-        val context = this.applicationContext
-        return when (context.getString(R.string.env)) {
-            "dev" ->
-                "http://" + context.getString(R.string.dev) + ":3001"
-            "production" ->
-                "http://" + context.getString(R.string.production) + ":3001"
-            else ->
-                "http://" + context.getString(R.string.production) + ":3001"
+        var url = Config.serverURL()
+        println("get ServerURL ${url}")
+        return url
+    }
+
+    companion object StreamHelpers{
+        fun convertStreamToFile(In: InputStream): File? {
+            val tempFile = File.createTempFile("temp","file")
+            tempFile.deleteOnExit()
+            try{
+                val out = FileOutputStream(tempFile)
+                IOUtils.copy(In, out)
+            } catch(e:Exception){
+            }
+            return tempFile
         }
     }
 
@@ -457,20 +472,28 @@ class MainActivity : AppCompatActivity() {
     var toSend = false
     @Throws(IOException::class)
     fun sendPhoto(){
+        println("SEND PHOTO")
         if(toSend != true) { return }
 
         var prefs = applicationContext.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var token = prefs.getString("auth_token","")
         var email = prefs.getString("user_email","")
         var file:File? = null
-
+        println("CURRRENT PHOTO PATH: ${currentPhotoPath}")
+        var photoFile:File?
+        if(currentImageInputStream != null){
+            //photoFile = currentImageInputStream.readBytes()
+            file = convertStreamToFile(currentImageInputStream!!)
+        } else {
+            file = File(currentPhotoPath)
+        }
         var requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("user_email", email)
             .addFormDataPart("user_token", token)
             .addFormDataPart("photo[name]", currentPhotoFilename)
             .addFormDataPart("photo[image]",currentPhotoFilename,
-                File(currentPhotoPath).asRequestBody(MEDIA_TYPE_JPEG)
+                file!!.asRequestBody(MEDIA_TYPE_JPEG)
             )
             .addFormDataPart("location[lat]", lat.toString())
             .addFormDataPart("location[lng]", lng.toString())
