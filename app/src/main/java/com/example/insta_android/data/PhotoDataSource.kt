@@ -102,22 +102,17 @@ class PhotoDataSource (var context:Context){
         val images = fetch_images(photoStream)
         val root = Environment.getExternalStorageDirectory().getPath().toString()
         images!!.forEach {
-            println(it.filename)
-            println(it)
+
             val write = File(root + "/INSTA/" + it.filename)
             try {
                 write.writeBytes(Base64.getMimeDecoder().decode(it.image))
             }catch(e: Exception){
                 println("image ${it.filename} is not readable ${e}.")
+            } finally {
+                val photo = Photo(it.url!! , it.name!! , "")
+                db!!.photoDao().insertAll(photo)
             }
         }
-//        images!!.forEach {
-//            val photo = Photo(it.url!! , it.name!! , "")
-//            db!!.photoDao().insertAll(photo)
-//            // TODO load the image too. from the link
-//            loadPhoto(Config.serverURL() + it.url!! , it.name)
-//        }
-
     }
 
 
@@ -125,6 +120,7 @@ class PhotoDataSource (var context:Context){
         return Config.serverURL() + "/photos.json"
     }
 
+    // to load files out of the single request
     private fun loadPhoto(url:String, name:String){
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var token = preferences.getString("auth_token","")

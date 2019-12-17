@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.os.StrictMode
+import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -20,6 +21,8 @@ import com.example.insta_android.ui.login.LoginActivity
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.image_feed.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -66,8 +69,10 @@ class PhotoFeedActivity: AppCompatActivity() {
             }
             val photoDataSource = PhotoDataSource(this.applicationContext)
             photoDataSource.sync()
+            println("${root}/INSTA/image.jpg")
+            Picasso.setSingletonInstance(Picasso.Builder(context).build())
+            Picasso.get().load(File("${root}/INSTA/")).into(imageView)
         }
-
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -77,6 +82,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         StrictMode.setThreadPolicy(policy)
         requestPermissions()
     }
+
     private fun requestPermissions(){
         println("------------- ACCESS!")
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -105,6 +111,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val photoDataSource = PhotoDataSource(this.applicationContext)
         photoDataSource.sync()
+
         return
 
         if(!( ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED &&
@@ -156,6 +163,7 @@ class PhotoFeedActivity: AppCompatActivity() {
             .url(url)
             .get()
             .build()
+
         var resp = client.newCall(request).execute()
 
         resp.use {

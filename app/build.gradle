@@ -50,7 +50,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     implementation 'org.apache.directory.studio:org.apache.commons.io:2.4'
-
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     // Room stuff
     def room_version = "2.2.2"
