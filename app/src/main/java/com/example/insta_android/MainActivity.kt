@@ -7,7 +7,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
@@ -26,7 +25,6 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.media.ExifInterface
-import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.provider.DocumentsContract
 import androidx.core.app.ActivityCompat
@@ -35,18 +33,10 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.ViewModelProviders
-import androidx.room.Room
 import com.example.insta_android.Config.Code.context
-import com.example.insta_android.data.AppDatabase
 import com.example.insta_android.data.LoginDataSource
-import com.example.insta_android.data.LoginRepository
 import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
-import com.example.insta_android.ui.login.LoginViewModel
-import com.example.insta_android.ui.login.LoginViewModelFactory
-import com.querydsl.core.util.FileUtils
-import com.example.insta_android.data.model.Photo as PhotoD
 
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -72,7 +62,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         state = savedInstanceState
-        Config.Code(applicationContext)
+        Config.Context(applicationContext)
         val url = Config.serverURL()
         println("################# URL")
         println(url)

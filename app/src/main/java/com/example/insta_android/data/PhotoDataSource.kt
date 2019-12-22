@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Environment
 import android.os.StrictMode
 import android.util.Base64.decode
+import androidx.paging.toLiveData
 import com.example.insta_android.Config
 import com.example.insta_android.MainActivity
 import com.example.insta_android.R
@@ -98,6 +99,7 @@ class PhotoDataSource (var context:Context){
         //}
 
         db = AppDatabase.getDatabase(context)
+        //db!!.photoDao().getPAll().toLiveData(10)
         db!!.photoDao().deleteAll()
         val images = fetch_images(photoStream)
         val root = Environment.getExternalStorageDirectory().getPath().toString()

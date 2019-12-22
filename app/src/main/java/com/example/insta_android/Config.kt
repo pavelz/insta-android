@@ -15,7 +15,7 @@ class Config {
         private var the_url:String = ""
         @SuppressLint("StaticFieldLeak")
         var context:Context? = null
-        fun Code(ctx : Context){
+        fun Context(ctx : Context){
             context = ctx
         }
         private fun isEmulator(): Boolean {

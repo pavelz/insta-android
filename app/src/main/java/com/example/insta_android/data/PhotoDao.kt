@@ -1,5 +1,6 @@
 package com.example.insta_android.data
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -26,4 +27,7 @@ interface PhotoDao {
 
     @Delete
     fun delete(photo: Photo)
+
+    @Query("SELECT * FROM photos ")
+    fun getPAll(): DataSource.Factory<Int, Photo>
 }
