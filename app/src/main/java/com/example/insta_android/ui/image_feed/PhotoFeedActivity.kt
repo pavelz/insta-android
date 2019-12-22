@@ -7,15 +7,17 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.os.StrictMode
-import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.RecyclerView
 import com.example.insta_android.Config
 import com.example.insta_android.MainActivity
 import com.example.insta_android.R
-import com.example.insta_android.data.PhotoDao
+import com.example.insta_android.data.PhotoAdapter
 import com.example.insta_android.data.PhotoDataSource
+import com.example.insta_android.data.model.PhotoViewModel
 import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
 import com.squareup.moshi.JsonAdapter
@@ -42,7 +44,7 @@ class PhotoFeedActivity: AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         // TODO: carry all image feed load here from main activity
-        Config.Code(applicationContext)
+        Config.Context(applicationContext)
 
         setContentView(R.layout.image_feed)
 
@@ -69,9 +71,12 @@ class PhotoFeedActivity: AppCompatActivity() {
             }
             val photoDataSource = PhotoDataSource(this.applicationContext)
             photoDataSource.sync()
-            println("${root}/INSTA/image.jpg")
-            Picasso.setSingletonInstance(Picasso.Builder(context).build())
-            Picasso.get().load(File("${root}/INSTA/")).into(imageView)
+            val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
+            val recyclerView = findViewById<RecyclerView>(R.id.recycle)
+            val adapter = PhotoAdapter()
+            //println("${root}/INSTA/image.jpg")
+            //Picasso.setSingletonInstance(Picasso.Builder(context).build())
+            //Picasso.get().load(File("${root}/INSTA/")).into(imageView)
         }
     }
 

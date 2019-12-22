@@ -60,5 +60,11 @@
             android:clickable="true"
             app:srcCompat="@android:drawable/ic_btn_speak_now" />
 
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="37dp"
+            android:text="@{person.displayName}" />
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
