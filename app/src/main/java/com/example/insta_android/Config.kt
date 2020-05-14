@@ -67,20 +67,20 @@ class Config {
             // production
             val url = when (env) {
                 "dev" ->
-                    "http://" + context!!.getString(R.string.dev) + ":3001"
+                    context!!.getString(R.string.dev)
                 "production" ->
-                    "http://" + context!!.getString(R.string.production) + ":3001"
+                    context!!.getString(R.string.production)
                 "phone_dev" ->
-                    "http://" + context!!.getString(R.string.phone_dev)+ ":3001"
+                    context!!.getString(R.string.phone_dev)
                 else ->
-                    "http://" + context!!.getString(R.string.production) + ":3001"
+                    context!!.getString(R.string.production)
             }
 
             return if(checkAlive(url)){   //  fall back when we are walking around - so we can access production as well. TODO: get this working in iOS app too
                 the_url = url
                 the_url
             } else {
-                the_url = "http://" + context!!.getString(R.string.production) + ":3001"
+                the_url = context!!.getString(R.string.production) + ":3001"
                 the_url
             }
         }
