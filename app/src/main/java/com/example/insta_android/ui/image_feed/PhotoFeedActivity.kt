@@ -119,7 +119,7 @@ class PhotoFeedActivity: AppCompatActivity() {
 
         return
 
-        if(!( ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED &&
+/*        if(!( ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
             return
         }
@@ -141,7 +141,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         val policy:StrictMode.ThreadPolicy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        var images = fetch_images("http://95.216.150.207:3001/photos.json")
+        var images = fetch_images(Config.serverURL() + "/photos.json")
         print("$images")
 
         File(root + "/INSTA").walk().forEach {
@@ -151,7 +151,7 @@ class PhotoFeedActivity: AppCompatActivity() {
             System.out.printf("photo url: %s\n", it.url)
             load_image("http://95.216.150.207:3001/" + it.url, it.name)
         }
-        var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
+        var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)*/
         // TODO: sync all images from the site. compare list against waht you have and add new.
         // TODO: load some images into image list on the device.
 

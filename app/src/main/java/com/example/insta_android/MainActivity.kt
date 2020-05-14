@@ -160,6 +160,7 @@ class MainActivity : AppCompatActivity() {
         // TODO: load some images into image list on the device.
 
     }
+
     class Photo(s: String, s1: String) {
         fun Photo(){}
         var url: String = ""
