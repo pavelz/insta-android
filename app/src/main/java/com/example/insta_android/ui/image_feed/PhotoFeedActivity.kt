@@ -10,26 +10,28 @@ import android.os.StrictMode
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
 import com.example.insta_android.Config
 import com.example.insta_android.MainActivity
 import com.example.insta_android.R
 import com.example.insta_android.data.PhotoAdapter
-import com.example.insta_android.data.PhotoDataSource
+import com.example.insta_android.data.MediaFeed
+import com.example.insta_android.data.model.Photo
 import com.example.insta_android.data.model.PhotoViewModel
 import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
+import com.facebook.flipper.android.AndroidFlipperClient
+import com.facebook.flipper.core.FlipperClient
+import com.facebook.flipper.plugins.databases.DatabasesFlipperPlugin
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.image_feed.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.file.Files
@@ -51,7 +53,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         var context = this.applicationContext
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var edit = preferences.edit()
-        var token = preferences.getString("auth_token","")
+        var token = null // preferences.getString("auth_token","")
         System.out.printf("----------- TOKEN: %s \n", token)
 
         if(token == "" || token == null) {
@@ -69,15 +71,15 @@ class PhotoFeedActivity: AppCompatActivity() {
             } catch(e: java.lang.Exception){
                 System.out.printf("---------> %s\n", e)
             }
-            val photoDataSource = PhotoDataSource(this.applicationContext)
-            photoDataSource.sync()
-            val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
-            val recyclerView = findViewById<RecyclerView>(R.id.recycle)
-            val adapter = PhotoAdapter()
-            //println("${root}/INSTA/image.jpg")
-            //Picasso.setSingletonInstance(Picasso.Builder(context).build())
-            //Picasso.get().load(File("${root}/INSTA/")).into(imageView)
+            val photoDataSource = MediaFeed(this.applicationContext)
+
+//            photoDataSource.sync(doneCallback)
+//            println("${root}/INSTA/image.jpg")
+//            Picasso.setSingletonInstance(Picasso.Builder(context).build())
+//            Picasso.get().load(File("${root}/INSTA/")).into(imageView)
         }
+        val client: FlipperClient = AndroidFlipperClient.getInstance(this)
+        client.addPlugin(DatabasesFlipperPlugin(Config.context))
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -114,8 +116,17 @@ class PhotoFeedActivity: AppCompatActivity() {
         }
         println("*** dir created at $root /INSTA")
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        val photoDataSource = PhotoDataSource(this.applicationContext)
-        photoDataSource.sync()
+        val mediaDataSource = MediaFeed(this.applicationContext)
+        mediaDataSource.sync()
+
+        val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
+        val recyclerView = findViewById<RecyclerView>(R.id.recycle)
+        val adapter = PhotoAdapter()
+        println("OBSERVER SET")
+        viewModel.photoList.observe(this, Observer<PagedList<Photo>>{ pagedList -> println("PAGED LIST CALLED"); adapter.submitList(pagedList)})
+        recyclerView.adapter = adapter
+
+        // TODO implement SwipeRefresh layout as in https://stackoverflow.com/questions/44454797/pull-to-refresh-recyclerview-android
 
         return
 
@@ -163,7 +174,7 @@ class PhotoFeedActivity: AppCompatActivity() {
 
         print("request\n")
         var request = Request.Builder()
-            .header("ContentType","application/json")
+            .header("Content-Type","application/json")
             .header("Accept", "application/json")
             .url(url)
             .get()

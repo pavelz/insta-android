@@ -7,38 +7,39 @@ import java.io.IOException
 import android.content.Context
 import android.os.Environment
 import android.os.StrictMode
-import android.util.Base64.decode
-import androidx.paging.toLiveData
 import com.example.insta_android.Config
 import com.example.insta_android.MainActivity
-import com.example.insta_android.R
-import com.querydsl.sql.types.StringAsObjectType
+import com.example.insta_android.data.model.Video
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import java.io.File
 import java.lang.Exception
 import java.nio.charset.Charset
-import java.util.*
+import java.security.MessageDigest
 
-class PhotoDataSource (var context:Context){
+class MediaFeed (var context:Context){
     val DATABASE = "photos"
     var db: AppDatabase? = null
     fun FeedSync(){
 
     }
 
-    class PhotoJson(s: String, s1: String) {
-        fun Photo(){}
+    class MediaJson(s: String , s1: String) {
         var url: String = ""
         var name: String = ""
         var filename: String = ""
-        var image: String = ""
+        var image: String = "" // TODO not being used atm, but not sure if binary loading from rails is ok... maybe from golang
+        var screenshot: String = ""
+        @field:Json(name = "class")
+        var className: String = ""
     }
+
     private var moshi = Moshi.Builder().build()
     private var photoJsonAdapter = moshi.adapter(MainActivity.Photo::class.java)
 
-    fun fetch_images(url: String): List<PhotoJson>? {
+    fun fetch_images(url: String): List<MediaJson>? {
         var str = arrayOf("")
 
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
@@ -47,10 +48,13 @@ class PhotoDataSource (var context:Context){
         System.out.printf("%s %s\n", token, email)
 
         print("request\n")
+        println("🏀 User email: ${email}")
+        println("🏀 User token: ${token}")
+
         var request = Request.Builder()
             .header("X-User-Email", email)
             .header("X-User-Token", token)
-            .header("ContentType","application/json")
+            .header("Content-Type","application/json")
             .header("Accept", "application/json")
             .url(url)
             .get()
@@ -64,25 +68,19 @@ class PhotoDataSource (var context:Context){
             if(!it!!.isSuccessful){
                 throw IOException("no images for u!")
             }
+            print("starting to decode")
             var text = resp.body!!.source().readString(Charset.defaultCharset())
+            print("decoded")
 
-            var ListType = Types.newParameterizedType(List::class.java, PhotoJson::class.java)
-            var adapter: JsonAdapter<List<PhotoJson>> = moshi.adapter(ListType)
-            var data:List<PhotoJson>? = adapter.fromJson(text)
-            System.out.printf(">>>>>>>>>>>>>> TEXT: %s \n", text)
+            var ListType = Types.newParameterizedType(List::class.java, MediaJson::class.java)
+            var adapter: JsonAdapter<List<MediaJson>> = moshi.adapter(ListType)
+            var data:List<MediaJson>? = adapter.fromJson(text)
+            System.out.printf(">>>>>>>>>>>>>> TEXT: %s\n", text)
             return data
         }
-
-        var blank: List<PhotoJson>? = List<PhotoJson>(0){
-            PhotoJson(
-                "hello",
-                "hi"
-            )
-        }
-        return  blank
     }
 
-    fun sync() {
+    fun sync(done: ()-> Any = {println("NO CALLBACK GIVEN")}) {
         // 1. make network connection
         // 2. get json of the feed and parse it
         // 3. load all files
@@ -104,17 +102,29 @@ class PhotoDataSource (var context:Context){
         val images = fetch_images(photoStream)
         val root = Environment.getExternalStorageDirectory().getPath().toString()
         images!!.forEach {
+            print("IT: $it")
+            if(it.className == "Photo") {
+                var photo = Photo(it.url!! , it.name!! , "")
+                val write = File(root + "/INSTA/" + it.filename)
 
-            val write = File(root + "/INSTA/" + it.filename)
-            try {
-                write.writeBytes(Base64.getMimeDecoder().decode(it.image))
-            }catch(e: Exception){
-                println("image ${it.filename} is not readable ${e}.")
-            } finally {
-                val photo = Photo(it.url!! , it.name!! , "")
-                db!!.photoDao().insertAll(photo)
+                try {
+                    // TODO: load file for 'url' into the dir. DONE
+                    photo = loadPhoto(photo)
+                    db!!.photoDao().insertAll(photo)
+                    // write.writeBytes(Base64.getMimeDecoder().decode(it.image))
+                } catch (e: Exception) {
+                    println("image ${it.filename} is not readable ${e}.")
+                }
+            }
+
+            if(it.className == "Video"){
+                println("🎥 Video 💥")
+//                val Video = Video(it.url!!, "video.mp4", it.filename ,it.screenshot)
+//                var write = File(root + "/INSA/" +  it.filename)
+
             }
         }
+        done.invoke()
     }
 
 
@@ -123,15 +133,19 @@ class PhotoDataSource (var context:Context){
     }
 
     // to load files out of the single request
-    private fun loadPhoto(url:String, name:String){
+    private fun loadPhoto(photo: Photo):Photo{
+        val localPhoto = photo
+        val url = Config.serverURL() + photo.url
+        val name = photo.name
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var token = preferences.getString("auth_token","")
         var email = preferences.getString("user_email","")
+
         System.out.printf("%s %s \n", token, email)
         var request = Request.Builder()
             .header("X-User-Email", email)
             .header("X-User-Token", token)
-            .url(url)
+            .url(url!!)
             .get()
             .build()
 
@@ -145,14 +159,17 @@ class PhotoDataSource (var context:Context){
             val root = Environment.getExternalStorageDirectory().getPath().toString()
 
             val dir = File("$root/INSTA")
+            val localFile = MessageDigest.getInstance("SHA-1")
+                .digest(photo.url!!.toByteArray())
+                .map { String.format("%02X", it) }
+                .joinToString(separator = "")
 
-            val file = File.createTempFile(
-                name, /* prefix */
-                ".jpg", /* suffix */
-                dir /* directory */
-            )
-            file!!.writeBytes(it.body!!.bytes())
+            val file = File("$dir/${localFile.toString()}.jpg")
+
+            file.writeBytes(it.body!!.bytes()) // TODO don't have to do that do it in memory.
+            localPhoto.fileName = "${localFile.toString()}.jpg"
         }
+        return localPhoto
     }
 
 
@@ -161,7 +178,7 @@ class PhotoDataSource (var context:Context){
 
         // GET
         val request = Request.Builder()
-            .header("ContentType","application/json")
+            .header("Content-Type","application/json")
             .header("Accept", "application/json")
             .url(photoStreamURL())
             .get()
