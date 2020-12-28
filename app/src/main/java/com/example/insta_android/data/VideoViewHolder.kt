@@ -11,7 +11,7 @@ import com.example.insta_android.R
 import com.example.insta_android.data.model.Photo
 import java.io.File
 
-class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.photo_item, parent, false)) {
+class VideoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.photo_item, parent, false)) {
     private val photoView = itemView.findViewById<ImageView>(R.id.photo)
     var photo : Photo? = null
     var bitmap : Bitmap? = null

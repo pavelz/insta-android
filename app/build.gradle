@@ -16,6 +16,12 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation":
+                                      "$projectDir/schemas".toString()]
+            }
+        }
     }
     buildTypes {
         release {
@@ -30,7 +36,9 @@ android {
 ext {
     querydslVersion = "4.1.4"
 }
-
+repositories {
+    jcenter()
+}
 dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:$querydslVersion:jpa"
     implementation "com.querydsl:querydsl-jpa:$querydslVersion"
@@ -45,7 +53,7 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation 'com.facebook.conceal:conceal:2.0.1@aar'
+    // implementation 'com.facebook.conceal:conceal:2.0.1@aar'
     implementation "com.squareup.moshi:moshi:1.8.0"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
@@ -105,4 +113,9 @@ dependencies {
 // Room
     implementation "android.arch.persistence.room:runtime:1.1.1"
     kapt "android.arch.persistence.room:compiler:1.1.1"
+
+    debugImplementation 'com.facebook.flipper:flipper:0.61.0'
+    debugImplementation 'com.facebook.soloader:soloader:0.9.0'
+
+    releaseImplementation 'com.facebook.flipper:flipper-noop:0.61.0'
 }

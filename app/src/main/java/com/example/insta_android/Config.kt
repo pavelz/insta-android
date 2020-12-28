@@ -42,18 +42,21 @@ class Config {
                 var res = client.newCall(req).execute()
                 res.use {
                     if (!it.isSuccessful) {
+                        println("💀 no repsonse from ${url}")
                         return false
                     }
+                    println("👍 good! from ${url}")
                     return true
                 }
             } catch(e: Exception) {
+                println("💣 exception ${e}")
                 return false
             }
 
         }
 
         fun serverURL():String{
-            // check if running in Emulator then use special addess
+            // check if running in Emulator then use special address
             // if not in emulator, then select phone_dev -> local net ip address - check if that address works.
             // FALLBACK to production if server does not respond.
             if(the_url != ""){
@@ -65,6 +68,7 @@ class Config {
             }
             // probably do a check here if phone_dev server abvailable - then fall back to
             // production
+            env = "phone_dev"
             val url = when (env) {
                 "dev" ->
                     context!!.getString(R.string.dev)
@@ -80,7 +84,7 @@ class Config {
                 the_url = url
                 the_url
             } else {
-                the_url = context!!.getString(R.string.production) + ":3001"
+                the_url = context!!.getString(R.string.production)
                 the_url
             }
         }

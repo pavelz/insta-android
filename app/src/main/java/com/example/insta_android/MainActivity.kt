@@ -152,8 +152,10 @@ class MainActivity : AppCompatActivity() {
             it.delete()
         }
         images!!.iterator().forEach {
-            System.out.printf("photo url: %s\n", it.url)
-            load_image("http://10.0.2.2:3001/" + it.url, it.name)
+            if(it.name != null) { // TODO remove XXX fixme shortime
+                System.out.printf("photo url: %s / %s\n" , it.url, it.name)
+                load_image(Config.serverURL() + it.url , it.name)
+            }
         }
         var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         // TODO: sync all images from the site. compare list against waht you have and add new.
@@ -210,7 +212,7 @@ class MainActivity : AppCompatActivity() {
 
         print("request\n")
         var request = Request.Builder()
-            .header("ContentType","application/json")
+            .header("Content-Type","application/json")
             .header("Accept", "application/json")
             .url(url)
             .get()

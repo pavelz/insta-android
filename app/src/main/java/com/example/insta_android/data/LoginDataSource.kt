@@ -12,6 +12,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 import java.nio.charset.Charset
+
 @Entity
 class User {
     fun User(){}
@@ -20,6 +21,7 @@ class User {
     var email: String = ""
     var authentication_token: String = ""
 }
+
 /**
  * Class that handles authentication w/ login credentials and retrieves user information.
  */
@@ -42,7 +44,7 @@ class LoginDataSource(var context: Context) {
             print("request\n")
 
             var request = Request.Builder()
-                .header("ContentType","application/json")
+                .header("Content-Type","application/json")
                 .header("Accept", "application/json")
                 .url(Config.serverURL() + "/users/sign_in")
                 .post(requestBody)
