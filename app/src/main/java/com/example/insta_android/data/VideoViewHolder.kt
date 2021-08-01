@@ -8,21 +8,20 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.insta_android.R
-import com.example.insta_android.data.model.Photo
-import java.io.File
+import com.example.insta_android.data.model.PhotoVideo
 
 class VideoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.photo_item, parent, false)) {
     private val photoView = itemView.findViewById<ImageView>(R.id.photo)
-    var photo : Photo? = null
+    var photoVideo : PhotoVideo? = null
     var bitmap : Bitmap? = null
     var id: Int = 0
     val root = Environment.getExternalStorageDirectory().getPath().toString()
 
     // populate data in new/reused ViewHolder
-    fun bindTo(photo : Photo?){
-        this.photo = photo
-        this.bitmap = BitmapFactory.decodeFile(root + "/INSTA/" + photo!!.fileName )
-        println("👀 loading bitmap $root + /INSTA/ + $photo!!.fileName")
+    fun bindTo(photoVideo : PhotoVideo?){
+        this.photoVideo = photoVideo
+        this.bitmap = BitmapFactory.decodeFile(root + "/INSTA/" + photoVideo!!.fileName )
+        println("👀 loading bitmap $root + /INSTA/ + $photoVideo!!.fileName")
         photoView.setImageBitmap(bitmap)
     }
 }

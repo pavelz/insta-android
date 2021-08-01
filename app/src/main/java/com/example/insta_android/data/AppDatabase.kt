@@ -3,14 +3,12 @@ package com.example.insta_android.data
 import android.content.Context
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.insta_android.data.PhotoDao
-import com.example.insta_android.data.model.Photo
+import com.example.insta_android.data.model.PhotoVideo
 import androidx.room.Room
-import android.icu.lang.UCharacter.GraphemeClusterBreak.V
 import com.example.insta_android.data.model.Video
 
 
-@Database(entities = arrayOf(Photo::class, Video::class), version = 3)
+@Database(entities = arrayOf(PhotoVideo::class, Video::class), version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun photoDao(): PhotoDao
 

@@ -1,15 +1,15 @@
 package com.example.insta_android.data
 
-import com.example.insta_android.data.model.Photo
+import com.example.insta_android.data.model.PhotoVideo
 import okhttp3.*
 
 import java.io.IOException
 import android.content.Context
 import android.os.Environment
 import android.os.StrictMode
+import android.util.Log
 import com.example.insta_android.Config
 import com.example.insta_android.MainActivity
-import com.example.insta_android.data.model.Video
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -34,6 +34,7 @@ class MediaFeed (var context:Context){
         var screenshot: String = ""
         @field:Json(name = "class")
         var className: String = ""
+        override fun toString() = "MediaJson($url, $name, $filename, $image, $screenshot)"
     }
 
     private var moshi = Moshi.Builder().build()
@@ -102,14 +103,18 @@ class MediaFeed (var context:Context){
         val images = fetch_images(photoStream)
         val root = Environment.getExternalStorageDirectory().getPath().toString()
         images!!.forEach {
-            print("IT: $it")
+            println("IT: $it")
+            Log.i("HEY", it.toString())
+            Log.i("CLASSNAME", it.className)
             if(it.className == "Photo") {
-                var photo = Photo(it.url!! , it.name!! , "")
+                println("🎥 Photo 🧨")
+
+                var photo = PhotoVideo(it.url, it.name, it.name, it.name, it.className)
                 val write = File(root + "/INSTA/" + it.filename)
 
                 try {
                     // TODO: load file for 'url' into the dir. DONE
-                    photo = loadPhoto(photo)
+                    photo = loadPhotoVideo(photo)
                     db!!.photoDao().insertAll(photo)
                     // write.writeBytes(Base64.getMimeDecoder().decode(it.image))
                 } catch (e: Exception) {
@@ -119,7 +124,23 @@ class MediaFeed (var context:Context){
 
             if(it.className == "Video"){
                 println("🎥 Video 💥")
-//                val Video = Video(it.url!!, "video.mp4", it.filename ,it.screenshot)
+                println(it)
+                // TODO hack to load at least screenshot here.
+                // LOAD screen shot
+                var filename = it.screenshot.substring(it.screenshot.lastIndexOf("/")+1);
+                var photo = PhotoVideo(it.url , filename , filename, it.screenshot, it.className)
+                val write = File(root + "/INSTA/" + filename)
+
+                try {
+                    // TODO: load file for 'url' into the dir. DONE
+                    photo = loadPhotoVideo(photo)
+                    db!!.photoDao().insertAll(photo)
+                    // write.writeBytes(Base64.getMimeDecoder().decode(it.image))
+                } catch (e: Exception) {
+                    println("image ${it.filename} is not readable ${e}.")
+                }
+
+//               val Video = Video(it.url!!, "video.mp4", it.filename ,it.screenshot)
 //                var write = File(root + "/INSA/" +  it.filename)
 
             }
@@ -133,15 +154,25 @@ class MediaFeed (var context:Context){
     }
 
     // to load files out of the single request
-    private fun loadPhoto(photo: Photo):Photo{
-        val localPhoto = photo
-        val url = Config.serverURL() + photo.url
-        val name = photo.name
+    // TODO refactor to load screenshot and video for video.
+    private fun loadPhotoVideo(photoVideo: PhotoVideo):PhotoVideo{
+        val localPhoto = photoVideo
+        val url = Config.serverURL() + photoVideo.url
+        val name = photoVideo.name
+        localPhoto.className = photoVideo.className
+        if(photoVideo.screenshot != null){
+            localPhoto.screenshot = loadFile(Config.serverURL() + photoVideo.screenshot!!)
+        }
+        localPhoto.fileName = loadFile(url)
+        return localPhoto
+    }
+
+    private fun loadFile(url: String): String {
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var token = preferences.getString("auth_token","")
         var email = preferences.getString("user_email","")
-
         System.out.printf("%s %s \n", token, email)
+
         var request = Request.Builder()
             .header("X-User-Email", email)
             .header("X-User-Token", token)
@@ -160,16 +191,17 @@ class MediaFeed (var context:Context){
 
             val dir = File("$root/INSTA")
             val localFile = MessageDigest.getInstance("SHA-1")
-                .digest(photo.url!!.toByteArray())
-                .map { String.format("%02X", it) }
+                .digest(url!!.toByteArray())
+                .map { kotlin.String.format("%02X", it) }
                 .joinToString(separator = "")
-
-            val file = File("$dir/${localFile.toString()}.jpg")
+            val extensionI = url.indexOfLast{ it == '.'}
+            val ext = url.substring(extensionI+1)
+            Log.i("LOADING EXTENSION!", ext)
+            val file = File("$dir/${localFile.toString()}.$ext")
 
             file.writeBytes(it.body!!.bytes()) // TODO don't have to do that do it in memory.
-            localPhoto.fileName = "${localFile.toString()}.jpg"
+            return "${localFile.toString()}.$ext"
         }
-        return localPhoto
     }
 
 

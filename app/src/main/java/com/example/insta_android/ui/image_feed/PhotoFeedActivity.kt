@@ -19,9 +19,8 @@ import com.example.insta_android.MainActivity
 import com.example.insta_android.R
 import com.example.insta_android.data.PhotoAdapter
 import com.example.insta_android.data.MediaFeed
-import com.example.insta_android.data.model.Photo
+import com.example.insta_android.data.model.PhotoVideo
 import com.example.insta_android.data.model.PhotoViewModel
-import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
 import com.facebook.flipper.android.AndroidFlipperClient
 import com.facebook.flipper.core.FlipperClient
@@ -123,7 +122,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recycle)
         val adapter = PhotoAdapter()
         println("OBSERVER SET")
-        viewModel.photoList.observe(this, Observer<PagedList<Photo>>{ pagedList -> println("PAGED LIST CALLED"); adapter.submitList(pagedList)})
+        viewModel.photoVideoList.observe(this, Observer<PagedList<PhotoVideo>>{ pagedList -> println("PAGED LIST CALLED"); adapter.submitList(pagedList)})
         recyclerView.adapter = adapter
 
         // TODO implement SwipeRefresh layout as in https://stackoverflow.com/questions/44454797/pull-to-refresh-recyclerview-android
