@@ -67,7 +67,13 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
         }
 
     }
-    fun getImageBitmap(url:String ):Bitmap {
+    companion object Cache{
+        var Cache =  hashMapOf<String, Bitmap?>()
+    }
+    fun getImageBitmap(url:String ): Bitmap? {
+        if(Cache.Cache[url] != null){
+            return Cache.Cache[url]
+        }
         var bm:Bitmap? = null;
         try {
             val aURL:URL  = URL(url);
@@ -81,6 +87,7 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
         } catch (e: IOException) {
             Log.e("TAG", "Error getting bitmap", e)
         }
-        return bm!!;
+        Cache.Cache[url] = bm
+        return bm;
     }
 }
