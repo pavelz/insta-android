@@ -161,9 +161,9 @@ class MediaFeed (var context:Context){
         val name = photoVideo.name
         localPhoto.className = photoVideo.className
         if(photoVideo.screenshot != null){
-            localPhoto.screenshot = loadFile(Config.serverURL() + photoVideo.screenshot!!)
+            // localPhoto.screenshot = loadFile(Config.serverURL() + photoVideo.screenshot!!)
         }
-        localPhoto.fileName = loadFile(url)
+        //localPhoto.fileName = loadFile(url)
         return localPhoto
     }
 

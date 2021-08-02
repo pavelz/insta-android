@@ -15,6 +15,7 @@ class PhotoAdapter(): PagedListAdapter<PhotoVideo , PhotoViewHolder>(diffCallbac
             val id = holder.id;
             val db = AppDatabase.getDatabase(Config.context!!);
             //holder.photoVideo?.let { it1 -> db!!.photoDao().delete(it1) }
+            Log.i("MEDIA HOLDER >>> ", "${holder.photoVideo}")
             holder.toggleVideo()
             Log.i("🥳 CLICK", holder.photoVideo.toString())
         }

@@ -3,6 +3,7 @@ package com.example.insta_android.data
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Environment
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -13,6 +14,13 @@ import com.example.insta_android.R
 import com.example.insta_android.data.model.PhotoVideo
 import android.util.Log
 import android.view.View
+import com.example.insta_android.Config
+import java.io.BufferedInputStream
+import java.io.IOException
+import java.io.InputStream
+import java.net.URI
+import java.net.URL
+import java.net.URLConnection
 
 class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.photo_item, parent, false)) {
     private val photoView = itemView.findViewById<ImageView>(R.id.photo)
@@ -22,10 +30,14 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
     var id: Int = 0
     val root = Environment.getExternalStorageDirectory().getPath().toString()
     fun toggleVideo(){
+        if(photoVideo == null) return
 
         if(photoVideo!!.className == "Video"){
-            Log.i("VIDEO CLICK", "Trying to load video: ${photoVideo!!.fileName}")
-            videoView.setVideoPath(root + "/INSTA/" + photoVideo!!.fileName!!)
+            //Log.i("VIDEO CLICK", "Trying to load video: ${photoVideo!!.fileName}")
+                Log.i(">>>> VIDEO", photoVideo.toString())
+            //videoView.setVideoPath(root + "/INSTA/" + photoVideo!!.fileName!!)
+            val uri = Uri.parse(Config.serverURL() +  photoVideo!!.url)
+            videoView.setVideoURI(uri)
             photoView.visibility = View.INVISIBLE
             videoView.visibility = View.VISIBLE
             videoView.start()
@@ -37,15 +49,38 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
         if( photoVideo!!.className == "Photo" ) {
             Log.i("Yee", "🧨 🧨 PHOTO")
             this.photoVideo = photoVideo
-            this.bitmap = BitmapFactory.decodeFile(root + "/INSTA/" + photoVideo!!.fileName)
-            println("👀 loading bitmap $root/INSTA/${photoVideo!!.fileName}")
-            photoView.setImageBitmap(bitmap)
+            val uri = Uri.parse(Config.serverURL() + photoVideo.url)
+            // photoView.setImageURI(uri)
+            val bmp = getImageBitmap(Config.serverURL() + photoVideo.url!!)
+            photoView.setImageBitmap(bmp)
+//            this.bitmap = BitmapFactory.decodeFile(root + "/INSTA/" + photoVideo!!.fileName)
+//            println("👀 loading bitmap $root/INSTA/${photoVideo!!.fileName}")
+//            photoView.setImageBitmap(bitmap)
         } else if (photoVideo!!.className == "Video") {
             Log.i("Yee", "🧨 🧨 VIDEO")
+            val bmp = getImageBitmap(Config.serverURL() + photoVideo.screenshot!!)
+            photoView.setImageBitmap(bmp)
             this.photoVideo = photoVideo
-            this.bitmap = BitmapFactory.decodeFile(root + "/INSTA/" + photoVideo!!.screenshot)
-            println("👀 loading bitmap $root/INSTA/${photoVideo!!.screenshot}")
-            photoView.setImageBitmap(bitmap)
+//            this.bitmap = BitmapFactory.decodeFile(root + "/INSTA/" + photoVideo!!.screenshot)
+//            println("👀 loading bitmap $root/INSTA/${photoVideo!!.screenshot}")
+//            photoView.setImageBitmap(bitmap)
         }
+
+    }
+    fun getImageBitmap(url:String ):Bitmap {
+        var bm:Bitmap? = null;
+        try {
+            val aURL:URL  = URL(url);
+            val conn:URLConnection  = aURL.openConnection();
+            conn.connect();
+            val isf:InputStream  = conn.getInputStream();
+            val bis:BufferedInputStream  = BufferedInputStream(isf);
+            bm = BitmapFactory.decodeStream(bis)
+            bis.close()
+            bis.close()
+        } catch (e: IOException) {
+            Log.e("TAG", "Error getting bitmap", e)
+        }
+        return bm!!;
     }
 }
