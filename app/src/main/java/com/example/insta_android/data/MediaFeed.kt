@@ -109,7 +109,7 @@ class MediaFeed (var context:Context){
             if(it.className == "Photo") {
                 println("🎥 Photo 🧨")
 
-                var photo = PhotoVideo(it.url, it.name, it.name, it.name, it.className)
+                var photo = PhotoVideo(it.url, it.name, "", null, it.className)
                 val write = File(root + "/INSTA/" + it.filename)
 
                 try {
