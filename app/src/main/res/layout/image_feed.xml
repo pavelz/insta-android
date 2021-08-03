@@ -11,7 +11,7 @@
         android:orientation="horizontal" >
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/take_a_picture"
             android:layout_width="106dp"
             android:layout_height="94dp"
             android:contentDescription="photo"
@@ -24,7 +24,7 @@
             android:layout_weight="1" />
 
         <Button
-            android:id="@+id/take_a_picture"
+            android:id="@+id/logout_screen"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"

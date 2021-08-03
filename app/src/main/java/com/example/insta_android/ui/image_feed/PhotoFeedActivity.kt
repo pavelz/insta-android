@@ -28,6 +28,7 @@ import com.facebook.flipper.plugins.databases.DatabasesFlipperPlugin
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import kotlinx.android.synthetic.main.image_feed.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -55,6 +56,14 @@ class PhotoFeedActivity: AppCompatActivity() {
         var token = null // preferences.getString("auth_token","")
         System.out.printf("----------- TOKEN: %s \n", token)
 
+        logout_screen.setOnClickListener { view ->
+            var k = Intent(this, LoginActivity::class.java)
+            startActivity(k)
+        }
+        take_a_picture.setOnClickListener { view ->
+            var k = Intent(this, MainActivity::class.java)
+            startActivity(k)
+        }
         if(token == "" || token == null) {
             try {
                 var k = Intent(this, LoginActivity::class.java)
