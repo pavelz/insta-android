@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="env">phone_dev</string>
+    <string name="env">production</string>
     <string name="dev">http://10.0.2.2:3001</string>
     <string name="production">https://arslogi.ca</string>
     <string name="phone_dev">http://192.168.5.86:3001</string>
