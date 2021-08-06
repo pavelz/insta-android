@@ -1,12 +1,15 @@
 package com.example.insta_android.ui.image_feed
 
 import android.Manifest
+import android.app.Activity
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.os.StrictMode
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -47,13 +50,24 @@ class PhotoFeedActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // TODO: carry all image feed load here from main activity
         Config.Context(applicationContext)
-
+        Log.i("ACTIVITY", "PhotoFeed::onCreate")
         setContentView(R.layout.image_feed)
 
+        val mgr:ActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        if(mgr.getRunningTasks(10).size > 1) {
+            Log.i("ACTIVITIES", "MORE THAN TWO")
+            var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+            StrictMode.setThreadPolicy(policy)
+            requestPermissions()
+            //attacheDatasourceToPageList()
+        }
+
+
         var context = this.applicationContext
+
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
         var edit = preferences.edit()
-        var token = null // preferences.getString("auth_token","")
+        var token = preferences.getString("auth_token","")
         System.out.printf("----------- TOKEN: %s \n", token)
 
         logout_screen.setOnClickListener { view ->
@@ -73,6 +87,8 @@ class PhotoFeedActivity: AppCompatActivity() {
                 e.printStackTrace()
             }
         } else {
+            // TODO fix - copied from activityresult
+
             val root = Environment.getExternalStorageDirectory().getPath().toString()
             try{
                 Files.createDirectory(Paths.get(root + "/INSTA"))
@@ -105,7 +121,9 @@ class PhotoFeedActivity: AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(
                 Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION ), 0)
-       }
+       } else {
+            attacheDatasourceToPageList()
+        }
     }
 
     // this is called when callback is returned.
@@ -127,12 +145,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         val mediaDataSource = MediaFeed(this.applicationContext)
         mediaDataSource.sync()
 
-        val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
-        val recyclerView = findViewById<RecyclerView>(R.id.recycle)
-        val adapter = PhotoAdapter()
-        println("OBSERVER SET")
-        viewModel.photoVideoList.observe(this, Observer<PagedList<PhotoVideo>>{ pagedList -> println("PAGED LIST CALLED"); adapter.submitList(pagedList)})
-        recyclerView.adapter = adapter
+        attacheDatasourceToPageList()
 
         // TODO implement SwipeRefresh layout as in https://stackoverflow.com/questions/44454797/pull-to-refresh-recyclerview-android
 
@@ -175,6 +188,21 @@ class PhotoFeedActivity: AppCompatActivity() {
         // TODO: load some images into image list on the device.
 
     }
+
+    private fun attacheDatasourceToPageList() {
+        Log.i("ATTACH", "attachedDataSource >>>>>>>>>>>")
+        val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
+        val recyclerView = findViewById<RecyclerView>(R.id.recycle)
+        val adapter = PhotoAdapter()
+        println("OBSERVER SET")
+        viewModel.photoVideoList.observe(
+            this ,
+            Observer<PagedList<PhotoVideo>> { pagedList ->
+                println("PAGED LIST CALLED"); adapter.submitList(pagedList)
+            })
+        recyclerView.adapter = adapter
+    }
+
     fun fetch_images(url: String): List<MainActivity.Photo>? {
         var str = arrayOf("")
         var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
