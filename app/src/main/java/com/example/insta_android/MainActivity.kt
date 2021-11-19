@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar as Toolbar?)
 
         fab.setOnClickListener { view ->
+            // TODO start getting videos as well.
             dispatchTakePictureIntent()
         }
 
@@ -320,6 +321,7 @@ class MainActivity : AppCompatActivity() {
     val PICK_IMAGE = 2
     var photoUri: Uri? = null
     private fun dispatchTakePictureIntent() {
+        // TODO need cameraLib to take videos
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(packageManager)?.also {
@@ -359,6 +361,7 @@ class MainActivity : AppCompatActivity() {
             println(a)
             println(url.scheme)
             println(url.path)
+
 
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, url)
             val image = findViewById<ImageView>(R.id.imageView2)

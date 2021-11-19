@@ -39,6 +39,7 @@ import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class PhotoFeedActivity: AppCompatActivity() {
 
@@ -52,6 +53,14 @@ class PhotoFeedActivity: AppCompatActivity() {
         Config.Context(applicationContext)
         Log.i("ACTIVITY", "PhotoFeed::onCreate")
         setContentView(R.layout.image_feed)
+        val refresh = findViewById<SwipeRefreshLayout>(R.id.refresh)
+        refresh.setOnRefreshListener {
+            // TODO implement refresh reload etc hahah
+
+            val mediaDataSource = MediaFeed(this.applicationContext)
+            mediaDataSource.sync()
+            refresh.isRefreshing = false
+        }
 
         val mgr:ActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         if(mgr.getRunningTasks(10).size > 1) {
@@ -193,6 +202,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         Log.i("ATTACH", "attachedDataSource >>>>>>>>>>>")
         val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
         val recyclerView = findViewById<RecyclerView>(R.id.recycle)
+
         val adapter = PhotoAdapter()
         println("OBSERVER SET")
         viewModel.photoVideoList.observe(
