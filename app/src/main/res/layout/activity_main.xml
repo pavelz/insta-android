@@ -36,7 +36,7 @@
             app:foo="@{1}" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
+            android:id="@+id/takePhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
@@ -44,7 +44,7 @@
             app:srcCompat="@android:drawable/ic_menu_camera" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab3"
+            android:id="@+id/sendPhotoVideo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
@@ -52,14 +52,21 @@
             app:srcCompat="@android:drawable/ic_menu_send" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/intentTest"
+            android:id="@+id/pickFromGallery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_margin="@dimen/fab_margin"
             android:clickable="true"
             app:srcCompat="@android:drawable/ic_btn_speak_now" />
-
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/takeVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_margin="@dimen/fab_margin"
+            android:clickable="true"
+            app:srcCompat="@android:drawable/ic_btn_speak_now" />
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"

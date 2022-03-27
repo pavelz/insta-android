@@ -12,7 +12,6 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
 
-
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -95,18 +94,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar as Toolbar?)
 
-        fab.setOnClickListener { view ->
+        takePhoto.setOnClickListener { view ->
             // TODO start getting videos as well.
             dispatchTakePictureIntent()
         }
 
-        intentTest.setOnClickListener(){
+        pickFromGallery.setOnClickListener(){
             val intent = Intent()
             intent.setType("image/*")
             intent.setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
-        fab3.setOnClickListener(){
+        sendPhotoVideo.setOnClickListener(){
             println("new")
             try {
                 // Request location updates
@@ -281,7 +280,7 @@ class MainActivity : AppCompatActivity() {
         override fun onLocationChanged(location: Location) {
             lat = location.latitude
             lng = location.longitude
-            sendPhoto()
+            sendPhotoVideo()
         }
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
         override fun onProviderEnabled(provider: String) {}
@@ -318,11 +317,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     val REQUEST_TAKE_PHOTO = 1
+    val REQUEST_VIDEO_CAPTURE = 1
     val PICK_IMAGE = 2
     var photoUri: Uri? = null
     private fun dispatchTakePictureIntent() {
         // TODO need cameraLib to take videos
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+        Intent(MediaStore.ACTION_VIDEO_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
@@ -331,7 +331,7 @@ class MainActivity : AppCompatActivity() {
                 } catch (ex: IOException) {
                     // Error occurred while creating the File
                     System.out.println(ex)
-                        null
+                    null
                 }
                 // Continue only if the File was successfully created
                 photoFile?.also {
@@ -342,7 +342,39 @@ class MainActivity : AppCompatActivity() {
                     )
                     photoUri = photoURI
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+                    startActivityForResult(takePictureIntent, REQUEST_VIDEO_CAPTURE)
+                    System.out.println("HEY INTENT")
+                }
+            }
+        }
+    }
+
+    // TODO:
+    // create video view under along with phtotview -> clickable to play
+    // ensure send button sends video or photo correctly
+    private fun dispatchTakeVideoIntent() {
+        // TODO need cameraLib to take videos
+        Intent(MediaStore.ACTION_VIDEO_CAPTURE).also { takeVideoIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takeVideoIntent.resolveActivity(packageManager)?.also {
+                // Create the File where the photo should go
+                val videoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    System.out.println(ex)
+                        null
+                }
+                // Continue only if the File was successfully created
+                videoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        this,
+                        "com.example.insta_android.fileprovider",
+                        it
+                    )
+                    photoUri = photoURI
+                    takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE)
                     System.out.println("HEY INTENT")
                 }
             }
@@ -393,7 +425,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     public fun sendFile(){
-        sendPhoto()
+        sendPhotoVideo()
     }
 
     private fun setPic() {
@@ -463,11 +495,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var MEDIA_TYPE_JPEG = "image/jpeg".toMediaTypeOrNull();
+    private var MEDIA_TYPE_MP4 = "image/jpeg".toMediaTypeOrNull();
 
     var client = OkHttpClient()
     var toSend = false
     @Throws(IOException::class)
-    fun sendPhoto(){
+    fun sendPhotoVideo(){
         println("SEND PHOTO")
         if(toSend != true) { return }
 
@@ -486,9 +519,9 @@ class MainActivity : AppCompatActivity() {
             .setType(MultipartBody.FORM)
             .addFormDataPart("user_email", email)
             .addFormDataPart("user_token", token)
-            .addFormDataPart("photo[name]", currentPhotoFilename)
-            .addFormDataPart("photo[image]",currentPhotoFilename,
-                file!!.asRequestBody(MEDIA_TYPE_JPEG)
+            .addFormDataPart("video[name]", currentPhotoFilename)
+            .addFormDataPart("video[video]",currentPhotoFilename,
+                file!!.asRequestBody(MEDIA_TYPE_MP4)
             )
             .addFormDataPart("location[lat]", lat.toString())
             .addFormDataPart("location[lng]", lng.toString())
@@ -497,7 +530,7 @@ class MainActivity : AppCompatActivity() {
 
         var request = Request.Builder()
 
-            .url( serverURL() + "/photos")
+            .url( serverURL() + "/videos")
             .post(requestBody)
             .build()
         System.out.println("Gettting to send")
