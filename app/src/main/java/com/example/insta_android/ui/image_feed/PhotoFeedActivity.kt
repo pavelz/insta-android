@@ -199,6 +199,8 @@ class PhotoFeedActivity: AppCompatActivity() {
     }
 
     private fun attacheDatasourceToPageList() {
+        val mediaDataSource = MediaFeed(this.applicationContext)
+        mediaDataSource.sync()
         Log.i("ATTACH", "attachedDataSource >>>>>>>>>>>")
         val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
         val recyclerView = findViewById<RecyclerView>(R.id.recycle)
