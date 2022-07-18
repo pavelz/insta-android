@@ -34,39 +34,58 @@
         <include
             layout="@layout/content_main"
             app:foo="@{1}" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/takePhoto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_menu_camera" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/sendPhotoVideo"
-            android:layout_width="wrap_content"
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_menu_send" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/pickFromGallery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_margin="@dimen/fab_margin"
-            android:clickable="true"
-            app:srcCompat="@android:drawable/ic_btn_speak_now" />
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/takeVideo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_margin="@dimen/fab_margin"
-            android:clickable="true"
-            app:srcCompat="@android:drawable/ic_btn_speak_now" />
+            >
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/takePhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="@dimen/fab_margin"
+                app:srcCompat="@android:drawable/ic_menu_camera" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" >
+            </Space>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/sendPhotoVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_margin="@dimen/fab_margin"
+                app:srcCompat="@android:drawable/ic_menu_send" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" >
+            </Space>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/pickFromGallery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_margin="@dimen/fab_margin"
+                android:clickable="true"
+                app:srcCompat="@android:drawable/ic_btn_speak_now" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" >
+            </Space>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/takeVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_margin="@dimen/fab_margin"
+                android:clickable="true"
+                app:srcCompat="@android:drawable/ic_btn_speak_now" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
