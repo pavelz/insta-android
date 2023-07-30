@@ -1,14 +1,15 @@
 package com.example.insta_android.ui.image_feed
 
 import android.Manifest
-import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.StrictMode
+import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -17,11 +18,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.insta_android.Config
 import com.example.insta_android.MainActivity
 import com.example.insta_android.R
-import com.example.insta_android.data.PhotoAdapter
 import com.example.insta_android.data.MediaFeed
+import com.example.insta_android.data.PhotoAdapter
 import com.example.insta_android.data.model.PhotoVideo
 import com.example.insta_android.data.model.PhotoViewModel
 import com.example.insta_android.ui.login.LoginActivity
@@ -37,9 +39,11 @@ import okhttp3.Request
 import java.io.File
 import java.io.IOException
 import java.nio.charset.Charset
+import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import kotlin.streams.toList
+
 
 class PhotoFeedActivity: AppCompatActivity() {
 
@@ -62,14 +66,17 @@ class PhotoFeedActivity: AppCompatActivity() {
             refresh.isRefreshing = false
         }
 
-        val mgr:ActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        if(mgr.getRunningTasks(10).size > 1) {
-            Log.i("ACTIVITIES", "MORE THAN TWO")
-            var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-            StrictMode.setThreadPolicy(policy)
+//        val mgr:ActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+//        Log.i("ACTIVITY", "WAT")
+//        val a = mgr.appTasks.size
+//        System.out.printf("APPTASK: %d\n", a)
+//        if(mgr.getAppTasks().size > 1) {
+//            Log.i("ACTIVITIES", "MORE THAN TWO")
+//            var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+//            StrictMode.setThreadPolicy(policy)
             requestPermissions()
-            //attacheDatasourceToPageList()
-        }
+//            //attacheDatasourceToPageList()
+//        }
 
 
         var context = this.applicationContext
@@ -88,6 +95,7 @@ class PhotoFeedActivity: AppCompatActivity() {
             startActivity(k)
         }
         if(token == "" || token == null) {
+            println(">>>>>>> WHAT321")
             try {
                 var k = Intent(this, LoginActivity::class.java)
 
@@ -98,11 +106,21 @@ class PhotoFeedActivity: AppCompatActivity() {
         } else {
             // TODO fix - copied from activityresult
 
-            val root = Environment.getExternalStorageDirectory().getPath().toString()
-            try{
-                Files.createDirectory(Paths.get(root + "/INSTA"))
-            } catch(e: java.lang.Exception){
-                System.out.printf("---------> %s\n", e)
+//            val root = Environment.getExternalStorageDirectory().getPath().toString()
+            val root = context.getExternalFilesDir(null).toString()
+            var dir = File(root, "INSTA")
+            try {
+                if (!dir.exists()) {
+                    if (!dir.mkdir()) {
+                        System.out.printf("################ borked\n")
+                    } else {
+                        println("---------- INSTA created")
+                    }
+                } else {
+                    System.out.printf("###################### already exists INSTA \n")
+                }
+            } catch(e: Exception){
+                System.out.printf("Create INSTA dir execption: %s\n", e)
             }
             val photoDataSource = MediaFeed(this.applicationContext)
 
@@ -113,6 +131,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         }
         val client: FlipperClient = AndroidFlipperClient.getInstance(this)
         client.addPlugin(DatabasesFlipperPlugin(Config.context))
+        Log.i("CREATE", "WOPOWOWOOW")
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -125,12 +144,20 @@ class PhotoFeedActivity: AppCompatActivity() {
 
     private fun requestPermissions(){
         println("------------- ACCESS!")
+//        if (Build.VERSION.SDK_INT >= 30) {
+//            if (!Environment.isExternalStorageManager()) {
+//                val getpermission = Intent()
+//                getpermission.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+//                startActivity(getpermission)
+//            }
+//        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(
                 Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.INTERNET, Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION ), 0)
-       } else {
+        } else {
             attacheDatasourceToPageList()
         }
     }
@@ -142,10 +169,11 @@ class PhotoFeedActivity: AppCompatActivity() {
         grantResults: IntArray
     ) {
         println("ON PERMISIONS\n--------------------------------\n")
+        var root =  applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
 
-        val root = Environment.getExternalStorageDirectory().getPath().toString()
+//        val root = Environment.getExternalStorageDirectory().getPath().toString()
         try{
-            Files.createDirectory(Paths.get(root + "/INSTA"))
+            Files.createDirectory(Paths.get("$root/INSTA"))
         } catch(e: java.lang.Exception){
             System.out.printf("---------> %s\n", e)
         }
@@ -153,6 +181,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val mediaDataSource = MediaFeed(this.applicationContext)
         mediaDataSource.sync()
+        println("YO")
 
         attacheDatasourceToPageList()
 

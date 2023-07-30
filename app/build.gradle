@@ -5,14 +5,14 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 28
-    dataBinding {
-        enabled = true
+    compileSdkVersion 32
+    buildFeatures{
+        dataBinding = true
     }
     defaultConfig {
         applicationId "com.example.insta_android"
-        minSdkVersion 28
-        targetSdkVersion 28
+        minSdkVersion 32
+        targetSdkVersion 32
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -32,6 +32,7 @@ android {
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
     }
+    namespace 'com.example.insta_android'
 }
 ext {
     querydslVersion = "4.1.4"
@@ -48,7 +49,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
@@ -60,6 +61,7 @@ dependencies {
     implementation 'org.apache.directory.studio:org.apache.commons.io:2.4'
     implementation 'com.squareup.picasso:picasso:2.71828'
 
+        
     // Room stuff
     def room_version = "2.2.3"
 

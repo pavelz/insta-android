@@ -13,11 +13,11 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun photoDao(): PhotoDao
 
     companion object {
-        val DATABASE_NAME = "/sdcard/INSTA/photos"
         var INSTANCE:AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase? {
             println("💥 database create")
-
+            val dir = context.getExternalFilesDir(null).toString()
+            val DATABASE_NAME = dir + "INSTA/photos"
             if (INSTANCE == null) {
                 INSTANCE = Room.databaseBuilder(context, AppDatabase::class.java, DATABASE_NAME)
                     .allowMainThreadQueries().build()

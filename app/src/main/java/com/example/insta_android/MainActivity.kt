@@ -245,13 +245,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun requestPermissions(){
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET ), 0)
         }
     }
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        super.onRestoreInstanceState(savedInstanceState)
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState!!)
         println("LOADING RESTORE STATE")
         if(savedInstanceState != null) {
             var path = savedInstanceState!!.getString("image_path")
@@ -260,7 +261,7 @@ class MainActivity : AppCompatActivity() {
                 var file = File(path)
                 var data = file.readBytes()
                 currentPhotoPath = path
-                currentPhotoFilename = savedInstanceState!!.getString("image_filename")
+                currentPhotoFilename = savedInstanceState!!.getString("image_filename").toString()
             }
         }
     }
@@ -456,7 +457,7 @@ class MainActivity : AppCompatActivity() {
             //galleryAddPic()
 
             var ex = ExifInterface(currentPhotoPath)
-            var attr = ex.getAttribute(ExifInterface.TAG_ORIENTATION).toInt()
+            var attr = ex.getAttribute(ExifInterface.TAG_ORIENTATION)!!.toInt()
             var rotatedBitmap:Bitmap = bitmap
             if(attr == 6){
                 var matrix = Matrix()
@@ -517,8 +518,8 @@ class MainActivity : AppCompatActivity() {
         }
         var requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("user_email", email)
-            .addFormDataPart("user_token", token)
+            .addFormDataPart("user_email", email.toString())
+            .addFormDataPart("user_token", token.toString())
             .addFormDataPart("video[name]", currentPhotoFilename)
             .addFormDataPart("video[video]",currentPhotoFilename,
                 file!!.asRequestBody(MEDIA_TYPE_MP4)

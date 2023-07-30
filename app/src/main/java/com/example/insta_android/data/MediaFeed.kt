@@ -53,8 +53,8 @@ class MediaFeed (var context:Context){
         println("🏀 User token: ${token}")
 
         var request = Request.Builder()
-            .header("X-User-Email", email)
-            .header("X-User-Token", token)
+            .header("X-User-Email", email.toString())
+            .header("X-User-Token", token.toString())
             .header("Content-Type","application/json")
             .header("Accept", "application/json")
             .url(url)
@@ -174,8 +174,8 @@ class MediaFeed (var context:Context){
         System.out.printf("%s %s \n", token, email)
 
         var request = Request.Builder()
-            .header("X-User-Email", email)
-            .header("X-User-Token", token)
+            .header("X-User-Email", email.toString())
+            .header("X-User-Token", token.toString())
             .url(url!!)
             .get()
             .build()
