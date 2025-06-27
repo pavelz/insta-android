@@ -12,7 +12,6 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
 
-import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -23,7 +22,7 @@ import android.graphics.Matrix
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.media.ExifInterface
+import androidx.exifinterface.media.ExifInterface
 import android.os.StrictMode
 import android.provider.DocumentsContract
 import androidx.core.app.ActivityCompat
@@ -46,6 +45,9 @@ import java.nio.charset.Charset
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.JsonAdapter
+import kotlinx.android.synthetic.main.activity_main.pickFromGallery
+import kotlinx.android.synthetic.main.activity_main.takePhoto
+import kotlinx.android.synthetic.main.activity_main.toolbar
 import org.apache.commons.io.IOUtils
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -105,7 +107,7 @@ class MainActivity : AppCompatActivity() {
             intent.setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
-        sendPhotoVideo.setOnClickListener(){
+        sendPhotoVideo().setOnClickListener(){
             println("new")
             try {
                 // Request location updates
@@ -302,8 +304,9 @@ class MainActivity : AppCompatActivity() {
         } catch(e: Exception){
             System.out.println("---------> Beh sdasdas\n")
         }
-
-        val dir = File(root + "/INSTA")
+        val context = this.applicationContext
+        val toor = context.getExternalFilesDir(null).toString()
+        val dir = File(toor + "/INSTA")
         val storageDir: File = dir //getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "JPEG_${timeStamp}_", /* prefix */
@@ -323,7 +326,7 @@ class MainActivity : AppCompatActivity() {
     var photoUri: Uri? = null
     private fun dispatchTakePictureIntent() {
         // TODO need cameraLib to take videos
-        Intent(MediaStore.ACTION_VIDEO_CAPTURE).also { takePictureIntent ->
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
