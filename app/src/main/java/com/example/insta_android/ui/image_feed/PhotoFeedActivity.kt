@@ -26,6 +26,7 @@ import com.example.insta_android.data.MediaFeed
 import com.example.insta_android.data.PhotoAdapter
 import com.example.insta_android.data.model.PhotoVideo
 import com.example.insta_android.data.model.PhotoViewModel
+import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
 import com.facebook.flipper.android.AndroidFlipperClient
 import com.facebook.flipper.core.FlipperClient
@@ -33,7 +34,6 @@ import com.facebook.flipper.plugins.databases.DatabasesFlipperPlugin
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import kotlinx.android.synthetic.main.image_feed.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -44,11 +44,11 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.streams.toList
 
-
 class PhotoFeedActivity: AppCompatActivity() {
 
     var client = OkHttpClient()
     private var moshi = Moshi.Builder().build()
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -66,18 +66,6 @@ class PhotoFeedActivity: AppCompatActivity() {
             refresh.isRefreshing = false
         }
 
-//        val mgr:ActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-//        Log.i("ACTIVITY", "WAT")
-//        val a = mgr.appTasks.size
-//        System.out.printf("APPTASK: %d\n", a)
-//        if(mgr.getAppTasks().size > 1) {
-//            Log.i("ACTIVITIES", "MORE THAN TWO")
-//            var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-//            StrictMode.setThreadPolicy(policy)
-            requestPermissions()
-//            //attacheDatasourceToPageList()
-//        }
-
 
         var context = this.applicationContext
 
@@ -85,8 +73,9 @@ class PhotoFeedActivity: AppCompatActivity() {
         var edit = preferences.edit()
         var token = preferences.getString("auth_token","")
         System.out.printf("----------- TOKEN: %s \n", token)
+        binding = ActivityMainBinding.inflate(layoutInflater)
 
-        logout_screen.setOnClickListener { view ->
+        binding.logout_screen.setOnClickListener { view ->
             var k = Intent(this, LoginActivity::class.java)
             startActivity(k)
         }
@@ -106,7 +95,6 @@ class PhotoFeedActivity: AppCompatActivity() {
         } else {
             // TODO fix - copied from activityresult
 
-//            val root = Environment.getExternalStorageDirectory().getPath().toString()
             val root = context.getExternalFilesDir(null).toString()
             var dir = File(root, "INSTA")
             try {
@@ -123,11 +111,6 @@ class PhotoFeedActivity: AppCompatActivity() {
                 System.out.printf("Create INSTA dir execption: %s\n", e)
             }
             val photoDataSource = MediaFeed(this.applicationContext)
-
-//            photoDataSource.sync(doneCallback)
-//            println("${root}/INSTA/image.jpg")
-//            Picasso.setSingletonInstance(Picasso.Builder(context).build())
-//            Picasso.get().load(File("${root}/INSTA/")).into(imageView)
         }
         val client: FlipperClient = AndroidFlipperClient.getInstance(this)
         client.addPlugin(DatabasesFlipperPlugin(Config.context))
@@ -144,13 +127,6 @@ class PhotoFeedActivity: AppCompatActivity() {
 
     private fun requestPermissions(){
         println("------------- ACCESS!")
-//        if (Build.VERSION.SDK_INT >= 30) {
-//            if (!Environment.isExternalStorageManager()) {
-//                val getpermission = Intent()
-//                getpermission.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-//                startActivity(getpermission)
-//            }
-//        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(
@@ -171,7 +147,6 @@ class PhotoFeedActivity: AppCompatActivity() {
         println("ON PERMISIONS\n--------------------------------\n")
         var root =  applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
 
-//        val root = Environment.getExternalStorageDirectory().getPath().toString()
         try{
             Files.createDirectory(Paths.get("$root/INSTA"))
         } catch(e: java.lang.Exception){
@@ -188,43 +163,6 @@ class PhotoFeedActivity: AppCompatActivity() {
         // TODO implement SwipeRefresh layout as in https://stackoverflow.com/questions/44454797/pull-to-refresh-recyclerview-android
 
         return
-
-/*        if(!( ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
-            return
-        }
-        println("ACCESS GRANTED")
-        try{
-            Files.createDirectory(Paths.get(root + "/INSTA"))
-        } catch(e: Exception){
-            System.out.printf("---------> %s\n", e)
-        }
-
-        val dir = File(root + "/INSTA")
-        dir.mkdirs()
-        val outfile = File(dir, "FIle.txt")
-        try {
-            val f = FileOutputStream(outfile)
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        }
-        val policy:StrictMode.ThreadPolicy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-
-        var images = fetch_images(Config.serverURL() + "/photos.json")
-        print("$images")
-
-        File(root + "/INSTA").walk().forEach {
-            it.delete()
-        }
-        images!!.iterator().forEach {
-            System.out.printf("photo url: %s\n", it.url)
-            load_image("http://95.216.150.207:3001/" + it.url, it.name)
-        }
-        var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)*/
-        // TODO: sync all images from the site. compare list against waht you have and add new.
-        // TODO: load some images into image list on the device.
-
     }
 
     private fun attacheDatasourceToPageList() {

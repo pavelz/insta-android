@@ -45,9 +45,6 @@ import java.nio.charset.Charset
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.JsonAdapter
-import kotlinx.android.synthetic.main.activity_main.pickFromGallery
-import kotlinx.android.synthetic.main.activity_main.takePhoto
-import kotlinx.android.synthetic.main.activity_main.toolbar
 import org.apache.commons.io.IOUtils
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -94,20 +91,22 @@ class MainActivity : AppCompatActivity() {
         StrictMode.setThreadPolicy(policy)
 
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar as Toolbar?)
+        val binding = ActivityMainBinding.inflate(layoutInflater)
 
-        takePhoto.setOnClickListener { view ->
+        setSupportActionBar(binding.toolbar as Toolbar?)
+
+        binding.takePhoto.setOnClickListener { view ->
             // TODO start getting videos as well.
             dispatchTakePictureIntent()
         }
 
-        pickFromGallery.setOnClickListener(){
+        binding.pickFromGallery.setOnClickListener(){
             val intent = Intent()
             intent.setType("image/*")
             intent.setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
-        sendPhotoVideo().setOnClickListener(){
+        binding.sendPhotoVideo.setOnClickListener(){
             println("new")
             try {
                 // Request location updates
