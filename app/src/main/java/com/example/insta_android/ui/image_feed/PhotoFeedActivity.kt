@@ -1,15 +1,12 @@
 package com.example.insta_android.ui.image_feed
 
 import android.Manifest
-import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.StrictMode
-import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,6 +24,7 @@ import com.example.insta_android.data.PhotoAdapter
 import com.example.insta_android.data.model.PhotoVideo
 import com.example.insta_android.data.model.PhotoViewModel
 import com.example.insta_android.databinding.ActivityMainBinding
+import com.example.insta_android.databinding.PhotoFeedActivityBinding
 import com.example.insta_android.ui.login.LoginActivity
 import com.facebook.flipper.android.AndroidFlipperClient
 import com.facebook.flipper.core.FlipperClient
@@ -39,16 +37,13 @@ import okhttp3.Request
 import java.io.File
 import java.io.IOException
 import java.nio.charset.Charset
-import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.streams.toList
 
 class PhotoFeedActivity: AppCompatActivity() {
 
     var client = OkHttpClient()
     private var moshi = Moshi.Builder().build()
-    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -56,7 +51,24 @@ class PhotoFeedActivity: AppCompatActivity() {
         // TODO: carry all image feed load here from main activity
         Config.Context(applicationContext)
         Log.i("ACTIVITY", "PhotoFeed::onCreate")
-        setContentView(R.layout.image_feed)
+        setContentView(R.layout.photo_feed_activity)
+
+        var context = this.applicationContext
+
+        var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
+        var edit = preferences.edit()
+        var token = preferences.getString("auth_token","")
+        System.out.printf("----------- TOKEN: %s \n", token)
+        val binding = PhotoFeedActivityBinding.inflate(layoutInflater)
+        binding.logoutScreen.setOnClickListener { view ->
+            var k = Intent(this, LoginActivity::class.java)
+            startActivity(k)
+        }
+        binding.takeAPicture.setOnClickListener { view ->
+            var k = Intent(this, MainActivity::class.java)
+            startActivity(k)
+        }
+
         val refresh = findViewById<SwipeRefreshLayout>(R.id.refresh)
         refresh.setOnRefreshListener {
             // TODO implement refresh reload etc hahah
@@ -67,22 +79,6 @@ class PhotoFeedActivity: AppCompatActivity() {
         }
 
 
-        var context = this.applicationContext
-
-        var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
-        var edit = preferences.edit()
-        var token = preferences.getString("auth_token","")
-        System.out.printf("----------- TOKEN: %s \n", token)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-
-        binding.logout_screen.setOnClickListener { view ->
-            var k = Intent(this, LoginActivity::class.java)
-            startActivity(k)
-        }
-        take_a_picture.setOnClickListener { view ->
-            var k = Intent(this, MainActivity::class.java)
-            startActivity(k)
-        }
         if(token == "" || token == null) {
             println(">>>>>>> WHAT321")
             try {
