@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="env">production</string>
-    <string name="dev">http://10.0.2.2:3001</string>
+    <string name="dev">https://10.0.2.2:3001</string>
     <string name="production">https://arslogi.ca</string>
-    <string name="phone_dev">http://192.168.1.19:3001</string>
+    <string name="phone_dev">https://192.168.1.19:3001</string>
 </resources>
