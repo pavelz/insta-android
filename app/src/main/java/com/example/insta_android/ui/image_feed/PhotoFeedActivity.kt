@@ -112,12 +112,10 @@ class PhotoFeedActivity: AppCompatActivity() {
         val client: FlipperClient = AndroidFlipperClient.getInstance(this)
         print("PRINT FLIPPER START\n")
         client.addPlugin(DatabasesFlipperPlugin(Config.context))
-        client.start()
         Log.i("CREATE", "WOPOWOWOOW")
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    public override fun onResume(){
         println("ACTIVITY RESULT!!!")
         var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
