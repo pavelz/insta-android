@@ -47,13 +47,13 @@ class PhotoFeedActivity: AppCompatActivity() {
     var client = OkHttpClient()
     private var moshi = Moshi.Builder().build()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         // TODO: carry all image feed load here from main activity
         Config.Context(applicationContext)
         Log.i("ACTIVITY", "PhotoFeed::onCreate")
-        setContentView(R.layout.photo_feed_activity)
 
         var context = this.applicationContext
 
@@ -62,7 +62,9 @@ class PhotoFeedActivity: AppCompatActivity() {
         var token = preferences.getString("auth_token","")
         System.out.printf("----------- TOKEN: %s \n", token)
         val binding = PhotoFeedActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         binding.logoutScreen.setOnClickListener { view ->
+            Log.i("CREATE", "FFFF")
             var k = Intent(this, LoginActivity::class.java)
             startActivity(k)
         }
