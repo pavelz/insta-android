@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.StrictMode
 import android.util.Log
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -113,13 +115,18 @@ class PhotoFeedActivity: AppCompatActivity() {
         print("PRINT FLIPPER START\n")
         client.addPlugin(DatabasesFlipperPlugin(Config.context))
         Log.i("CREATE", "WOPOWOWOOW")
+        var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        requestPermissions()
+        Log.i("CREATE","INITIAL INTENT DONE")
     }
 
-    public override fun onResume(){
+    override fun onNewIntent(result: Intent){
         println("ACTIVITY RESULT!!!")
         var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         requestPermissions()
+        super.onNewIntent(result)
     }
 
     private fun requestPermissions(){
