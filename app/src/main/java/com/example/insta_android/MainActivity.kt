@@ -130,6 +130,7 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        println("LOADING IMAGES MAINACTIVITY")
         println("ACCESS GRANTED")
         val root = Environment.getExternalStorageDirectory().getPath().toString()
         try{
@@ -145,18 +146,6 @@ class MainActivity : AppCompatActivity() {
             val f = FileOutputStream(outfile)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
-        }
-        var images = fetch_images(serverURL() + "/photos.json")
-        print("$images")
-
-        File(root + "/INSTA").walk().forEach {
-            it.delete()
-        }
-        images!!.iterator().forEach {
-            if(it.name != null) { // TODO remove XXX fixme shortime
-                System.out.printf("photo url: %s / %s\n" , it.url, it.name)
-                load_image(Config.serverURL() + it.url , it.name)
-            }
         }
         var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         // TODO: sync all images from the site. compare list against waht you have and add new.
@@ -198,7 +187,8 @@ class MainActivity : AppCompatActivity() {
             val root = Environment.getExternalStorageDirectory().getPath().toString()
 
             var dir = File(root + "/INSTA")
-
+            Log.i("CREATE", "directory:")
+            Log.i("CREATE", root + "/INSTA")
             file = File.createTempFile(
                 name, /* prefix */
                 ".jpg", /* suffix */
