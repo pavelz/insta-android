@@ -90,8 +90,8 @@ class MainActivity : AppCompatActivity() {
         var policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        setContentView(R.layout.activity_main)
         val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar as Toolbar?)
 
@@ -147,10 +147,10 @@ class MainActivity : AppCompatActivity() {
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         }
+
         var binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         // TODO: sync all images from the site. compare list against waht you have and add new.
         // TODO: load some images into image list on the device.
-
     }
 
     class Photo(s: String, s1: String) {
