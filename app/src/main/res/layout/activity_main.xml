@@ -71,7 +71,7 @@
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_margin="@dimen/fab_margin"
                 android:clickable="true"
-                app:srcCompat="@android:drawable/ic_btn_speak_now" />
+                app:srcCompat="@android:drawable/ic_menu_gallery" />
             <Space
                 android:layout_width="0dp"
                 android:layout_height="1dp"
@@ -84,7 +84,7 @@
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_margin="@dimen/fab_margin"
                 android:clickable="true"
-                app:srcCompat="@android:drawable/ic_btn_speak_now" />
+                app:srcCompat="@drawable/ic_media_video_poster2" />
         </androidx.appcompat.widget.LinearLayoutCompat>
         <TextView
             android:id="@+id/textView"

@@ -106,6 +106,7 @@ class MainActivity : AppCompatActivity() {
             intent.setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
+
         binding.sendPhotoVideo.setOnClickListener(){
             println("new")
             try {
@@ -267,13 +268,14 @@ class MainActivity : AppCompatActivity() {
     var lat: Double = 0.0
     var lng: Double = 0.0
 
-    //tedefine the listener
+    // to define the listener
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             lat = location.latitude
             lng = location.longitude
             sendPhotoVideo()
         }
+
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
