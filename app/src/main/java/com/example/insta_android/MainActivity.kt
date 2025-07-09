@@ -508,6 +508,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             file = File(currentPhotoPath)
         }
+
         var requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("user_email", email.toString())
@@ -522,10 +523,12 @@ class MainActivity : AppCompatActivity() {
 
 
         var request = Request.Builder()
-
+            .header("X-User-Email", email.toString())
+            .header("X-User-Token", token.toString())
             .url( serverURL() + "/videos")
             .post(requestBody)
             .build()
+
         System.out.println("Gettting to send")
         var req = client.newCall(request)
         var response = req.execute()

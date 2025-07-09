@@ -28,11 +28,12 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
     var bitmap : Bitmap? = null
     var id: Int = 0
     val root = Environment.getExternalStorageDirectory().getPath().toString()
+
     fun toggleVideo(){
         if(photoVideo == null) return
 
         if(photoVideo!!.className == "Video"){
-            //Log.i("VIDEO CLICK", "Trying to load video: ${photoVideo!!.fileName}")
+            Log.i("CREATE", "Trying to load video: ${photoVideo!!.fileName}")
                 Log.i(">>>> VIDEO", photoVideo.toString())
             //videoView.setVideoPath(root + "/INSTA/" + photoVideo!!.fileName!!)
             val uri = Uri.parse(Config.serverURL() +  photoVideo!!.url)
@@ -46,7 +47,7 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
     fun bindTo(photoVideo : PhotoVideo?){
         Log.i("PAGER", photoVideo!!.toString())
         if( photoVideo!!.className == "Photo" ) {
-            Log.i("Yee", "🧨 🧨 PHOTO")
+            Log.i("CREATE", "🧨 🧨 PHOTO")
             this.photoVideo = photoVideo
             val uri = Uri.parse(Config.serverURL() + photoVideo.url)
             // photoView.setImageURI(uri)
@@ -56,7 +57,7 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
 //            println("👀 loading bitmap $root/INSTA/${photoVideo!!.fileName}")
 //            photoView.setImageBitmap(bitmap)
         } else if (photoVideo!!.className == "Video") {
-            Log.i("Yee", "🧨 🧨 VIDEO")
+            Log.i("CREATE", "🧨 🧨 VIDEO")
             val bmp = getImageBitmap(Config.serverURL() + photoVideo.screenshot!!)
             photoView.setImageBitmap(bmp)
             this.photoVideo = photoVideo
