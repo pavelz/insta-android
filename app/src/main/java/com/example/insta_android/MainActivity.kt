@@ -120,10 +120,8 @@ class MainActivity : AppCompatActivity() {
         // Create persistent LocationManager reference
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?;
         System.out.printf(">>>> path: %s\n",Environment.getExternalStorageDirectory().getPath().toString())
-
-
-
     }
+
     // this is called when callback is returned.
     override fun onRequestPermissionsResult(
         requestCode: Int,

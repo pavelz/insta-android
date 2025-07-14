@@ -40,6 +40,10 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
             videoView.setVideoURI(uri)
             photoView.visibility = View.INVISIBLE
             videoView.visibility = View.VISIBLE
+            videoView.setOnPreparedListener { mediaPlayer ->
+                mediaPlayer.isLooping = true
+                videoView.start()
+            }
             videoView.start()
         }
     }
