@@ -14,6 +14,7 @@ import com.example.insta_android.R
 import com.example.insta_android.data.model.PhotoVideo
 import android.util.Log
 import android.view.View
+import android.widget.ImageButton
 import com.example.insta_android.Config
 import java.io.BufferedInputStream
 import java.io.IOException
