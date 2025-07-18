@@ -22,6 +22,10 @@ class PhotoAdapter(): PagedListAdapter<PhotoVideo , PhotoViewHolder>(diffCallbac
 
         val deleteButton = holder.itemView.findViewById<ImageButton>(R.id.deletePhotoVideo)
         val copyLink = holder.itemView.findViewById<ImageButton>(R.id.copyLink)
+        deleteButton.setOnClickListener {
+            // do post delete
+            //
+        }
         copyLink.setOnClickListener {
             Toast.makeText(context, "copy link", Toast.LENGTH_SHORT ).show()
             var clipboard = Config.context?.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager

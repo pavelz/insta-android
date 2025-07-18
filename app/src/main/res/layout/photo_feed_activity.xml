@@ -51,11 +51,5 @@
         app:layoutManager="LinearLayoutManager" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="103dp">
-
-
-    </ScrollView>
 
 </LinearLayout>

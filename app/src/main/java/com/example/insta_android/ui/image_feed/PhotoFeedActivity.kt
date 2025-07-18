@@ -27,6 +27,7 @@ import com.example.insta_android.data.model.PhotoVideo
 import com.example.insta_android.data.model.PhotoViewModel
 import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.databinding.PhotoFeedActivityBinding
+import com.example.insta_android.recyclerview.MoreSpaceLayoutManager
 import com.example.insta_android.ui.login.LoginActivity
 import com.facebook.flipper.android.AndroidFlipperClient
 import com.facebook.flipper.core.FlipperClient
@@ -54,7 +55,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         // TODO: carry all image feed load here from main activity
         Config.Context(applicationContext)
         Log.i("ACTIVITY", "PhotoFeed::onCreate")
-
+        MoreSpaceLayoutManager(this)
         var context = this.applicationContext
 
         var preferences = context.getSharedPreferences("insta", Context.MODE_PRIVATE)
@@ -170,14 +171,16 @@ class PhotoFeedActivity: AppCompatActivity() {
 
         return
     }
-
+    private val mLayoutManager by lazy {
+        MoreSpaceLayoutManager(this)
+    }
     private fun attacheDatasourceToPageList() {
         val mediaDataSource = MediaFeed(this.applicationContext)
         mediaDataSource.sync()
         Log.i("ATTACH", "attachedDataSource >>>>>>>>>>>")
         val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
         val recyclerView = findViewById<RecyclerView>(R.id.recycle)
-
+        recyclerView.layoutManager = mLayoutManager
         val adapter = PhotoAdapter()
         println("OBSERVER SET")
         viewModel.photoVideoList.observe(
@@ -220,6 +223,7 @@ class PhotoFeedActivity: AppCompatActivity() {
             .url(url)
             .get()
             .build()
+
         var resp = client.newCall(request).execute()
         var file:File? = null
         resp.use {
