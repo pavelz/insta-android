@@ -15,6 +15,7 @@ import com.example.insta_android.data.model.PhotoVideo
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
+import androidx.core.view.updateLayoutParams
 import com.example.insta_android.Config
 import java.io.BufferedInputStream
 import java.io.IOException
@@ -39,13 +40,16 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
             //videoView.setVideoPath(root + "/INSTA/" + photoVideo!!.fileName!!)
             val uri = Uri.parse(Config.serverURL() +  photoVideo!!.url)
             videoView.setVideoURI(uri)
+            videoView.requestFocus()
             photoView.visibility = View.INVISIBLE
             videoView.visibility = View.VISIBLE
             videoView.setOnPreparedListener { mediaPlayer ->
+                var layout = videoView.layoutParams
+                layout.height = mediaPlayer.videoHeight
+                videoView.setLayoutParams(layout)
                 mediaPlayer.isLooping = true
                 videoView.start()
             }
-            videoView.start()
         }
     }
     // populate data in new/reused ViewHolder

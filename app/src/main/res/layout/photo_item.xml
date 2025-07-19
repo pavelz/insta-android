@@ -24,6 +24,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:visibility="visible"
+                    android:scaleType="centerCrop"
                     tools:layout_editor_absoluteX="4dp"
                     tools:layout_editor_absoluteY="4dp" />
 
@@ -31,8 +32,8 @@
                     android:id="@+id/video"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_gravity="start"
-                    android:visibility="invisible"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
                     tools:layout_editor_absoluteX="4dp"
                     tools:layout_editor_absoluteY="4dp" />
             </FrameLayout>
