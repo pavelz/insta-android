@@ -43,6 +43,7 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
             videoView.requestFocus()
             photoView.visibility = View.INVISIBLE
             videoView.visibility = View.VISIBLE
+
             videoView.setOnPreparedListener { mediaPlayer ->
                 var layout = videoView.layoutParams
                 layout.height = mediaPlayer.videoHeight
@@ -55,26 +56,28 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
     // populate data in new/reused ViewHolder
     fun bindTo(photoVideo : PhotoVideo?){
         Log.i("PAGER", photoVideo!!.toString())
-        if( photoVideo!!.className == "Photo" ) {
-            Log.i("CREATE", "🧨 🧨 PHOTO")
-            this.photoVideo = photoVideo
-            val uri = Uri.parse(Config.serverURL() + photoVideo.url)
-            // photoView.setImageURI(uri)
-            val bmp = getImageBitmap(Config.serverURL() + photoVideo.url!!)
-            photoView.setImageBitmap(bmp)
+        if(photoView.drawable == null) {
+            if (photoVideo!!.className == "Photo") {
+                Log.i("CREATE", "🧨 🧨 PHOTO")
+                this.photoVideo = photoVideo
+                val uri = Uri.parse(Config.serverURL() + photoVideo.url)
+                // photoView.setImageURI(uri)
+                val bmp = getImageBitmap(Config.serverURL() + photoVideo.url!!)
+                photoView.setImageBitmap(bmp)
+
 //            this.bitmap = BitmapFactory.decodeFile(root + "/INSTA/" + photoVideo!!.fileName)
 //            println("👀 loading bitmap $root/INSTA/${photoVideo!!.fileName}")
 //            photoView.setImageBitmap(bitmap)
-        } else if (photoVideo!!.className == "Video") {
-            Log.i("CREATE", "🧨 🧨 VIDEO")
-            val bmp = getImageBitmap(Config.serverURL() + photoVideo.screenshot!!)
-            photoView.setImageBitmap(bmp)
-            this.photoVideo = photoVideo
+            } else if (photoVideo!!.className == "Video") {
+                Log.i("CREATE", "🧨 🧨 VIDEO")
+                val bmp = getImageBitmap(Config.serverURL() + photoVideo.screenshot!!)
+                photoView.setImageBitmap(bmp)
+                this.photoVideo = photoVideo
 //            this.bitmap = BitmapFactory.decodeFile(root + "/INSTA/" + photoVideo!!.screenshot)
 //            println("👀 loading bitmap $root/INSTA/${photoVideo!!.screenshot}")
 //            photoView.setImageBitmap(bitmap)
+            }
         }
-
     }
     companion object Cache{
         var Cache =  hashMapOf<String, Bitmap?>()
@@ -91,7 +94,6 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
             val isf:InputStream  = conn.getInputStream();
             val bis:BufferedInputStream  = BufferedInputStream(isf);
             bm = BitmapFactory.decodeStream(bis)
-            bis.close()
             bis.close()
         } catch (e: IOException) {
             Log.e("TAG", "Error getting bitmap", e)

@@ -11,6 +11,6 @@ class MoreSpaceLayoutManager(context: Context) : LinearLayoutManager(context) {
     override fun getExtraLayoutSpace(state: RecyclerView.State?): Int {
         Log.i("CREATE", "LAYOUT EXTRA")
         Log.i("CREATE", extraLayoutSpace.toString())
-        return 5000
+        return 15000
     }
 }

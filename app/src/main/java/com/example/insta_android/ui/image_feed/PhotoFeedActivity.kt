@@ -83,6 +83,8 @@ class PhotoFeedActivity: AppCompatActivity() {
             refresh.isRefreshing = false
         }
 
+        var recycle = findViewById<RecyclerView>(R.id.recycle)
+        recycle.setHasFixedSize(false)
 
         if(token == "" || token == null) {
             println(">>>>>>> WHAT321")
@@ -181,6 +183,7 @@ class PhotoFeedActivity: AppCompatActivity() {
         val viewModel = ViewModelProviders.of(this).get(PhotoViewModel::class.java)
         val recyclerView = findViewById<RecyclerView>(R.id.recycle)
         recyclerView.layoutManager = mLayoutManager
+        recyclerView.setItemViewCacheSize(20)
         val adapter = PhotoAdapter()
         println("OBSERVER SET")
         viewModel.photoVideoList.observe(
