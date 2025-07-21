@@ -80,7 +80,7 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
         }
     }
     companion object Cache{
-        var Cache =  hashMapOf<String, Bitmap?>()
+        var Cache = hashMapOf<String, Bitmap?>()
     }
     fun getImageBitmap(url:String ): Bitmap? {
         if(Cache.Cache[url] != null){
