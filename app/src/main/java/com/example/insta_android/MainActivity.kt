@@ -102,7 +102,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.pickFromGallery.setOnClickListener(){
             val intent = Intent()
-            intent.setType("image/*")
+            intent.setType("*/*")
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("video/*", "image/*"))
             intent.setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
@@ -382,8 +383,6 @@ class MainActivity : AppCompatActivity() {
             println(data!!.data!!.path)
             currentPhotoPath = data.data!!.path!!
             val url = data.data!!
-            val a = DocumentsContract.getDocumentId(url)
-            println(a)
             println(url.scheme)
             println(url.path)
 
@@ -501,6 +500,7 @@ class MainActivity : AppCompatActivity() {
         var token = prefs.getString("auth_token","")
         var email = prefs.getString("user_email","")
         var file:File? = null
+
         println("CURRRENT PHOTO PATH: ${currentPhotoPath}")
         var photoFile:File?
         if(currentImageInputStream != null){
