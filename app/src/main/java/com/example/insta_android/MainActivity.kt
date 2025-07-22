@@ -104,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent()
             intent.setType("*/*")
             intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("video/*", "image/*"))
+
             intent.setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
@@ -282,6 +283,7 @@ class MainActivity : AppCompatActivity() {
     var currentPhotoPath: String = ""
     var currentPhotoFilename: String = ""
     var currentPhotoUri:Uri? = null
+    var currentMimeType:String = ""
 
 
     @Throws(IOException::class)
@@ -385,13 +387,15 @@ class MainActivity : AppCompatActivity() {
             val url = data.data!!
             println(url.scheme)
             println(url.path)
-
+            Log.i("CREATE", data.toString())
 
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, url)
             val image = findViewById<ImageView>(R.id.imageView2)
             val proj:Array<out String> = arrayOf(MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME )
             val cursor = contentResolver.query(url, proj,null, null, null)
             println(contentResolver.getType(url))
+            currentMimeType = contentResolver.getType(url)!!
+
             val fn = contentResolver.openFileDescriptor(url, "r")
             val index = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
             currentImageInputStream = context!!.contentResolver.openInputStream(data.data!!)
@@ -508,25 +512,39 @@ class MainActivity : AppCompatActivity() {
         } else {
             file = File(currentPhotoPath)
         }
-
+        var postUrl = ""
         var requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("user_email", email.toString())
             .addFormDataPart("user_token", token.toString())
-            .addFormDataPart("video[name]", currentPhotoFilename)
-            .addFormDataPart("video[video]",currentPhotoFilename,
-                file!!.asRequestBody(MEDIA_TYPE_MP4)
-            )
-            .addFormDataPart("location[lat]", lat.toString())
+
+        if(currentMimeType == "video/mp4") {
+           requestBody.addFormDataPart("video[name]", currentPhotoFilename)
+                .addFormDataPart(
+                    "video[video]", currentPhotoFilename,
+                    file!!.asRequestBody(MEDIA_TYPE_MP4)
+                )
+            postUrl = "/videos"
+        }
+
+        if(currentMimeType == "image/jpeg") {
+           requestBody.addFormDataPart("photo[name]", currentPhotoFilename)
+                .addFormDataPart(
+                    "photo[image]", currentPhotoFilename,
+                    file!!.asRequestBody(MEDIA_TYPE_JPEG)
+                )
+            postUrl = "/photos"
+        }
+
+        requestBody.addFormDataPart("location[lat]", lat.toString())
             .addFormDataPart("location[lng]", lng.toString())
-            .build()
 
 
         var request = Request.Builder()
             .header("X-User-Email", email.toString())
             .header("X-User-Token", token.toString())
             .url( serverURL() + "/videos")
-            .post(requestBody)
+            .post(requestBody.build())
             .build()
 
         System.out.println("Gettting to send")
