@@ -96,14 +96,13 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar as Toolbar?)
 
         binding.takePhoto.setOnClickListener { view ->
-            // TODO start getting videos as well.
             dispatchTakePictureIntent()
         }
 
         binding.takeVideo.setOnClickListener { view ->
-            // TODO start getting videos as well.
             dispatchTakeVideoIntent()
         }
+
         binding.pickFromGallery.setOnClickListener(){
             val intent = Intent()
             intent.setType("*/*")
