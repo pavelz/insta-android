@@ -543,7 +543,7 @@ class MainActivity : AppCompatActivity() {
         var request = Request.Builder()
             .header("X-User-Email", email.toString())
             .header("X-User-Token", token.toString())
-            .url( serverURL() + "/videos")
+            .url( serverURL() + postUrl)
             .post(requestBody.build())
             .build()
 
