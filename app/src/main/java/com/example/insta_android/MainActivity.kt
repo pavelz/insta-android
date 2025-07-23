@@ -100,6 +100,10 @@ class MainActivity : AppCompatActivity() {
             dispatchTakePictureIntent()
         }
 
+        binding.takeVideo.setOnClickListener { view ->
+            // TODO start getting videos as well.
+            dispatchTakeVideoIntent()
+        }
         binding.pickFromGallery.setOnClickListener(){
             val intent = Intent()
             intent.setType("*/*")
