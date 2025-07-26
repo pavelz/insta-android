@@ -24,7 +24,6 @@ import android.location.LocationListener
 import android.location.LocationManager
 import androidx.exifinterface.media.ExifInterface
 import android.os.StrictMode
-import android.provider.DocumentsContract
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import android.util.Log
@@ -290,7 +289,7 @@ class MainActivity : AppCompatActivity() {
 
 
     @Throws(IOException::class)
-    private fun createImageFile(): File {
+    private fun createMediaFile(kind: Int = REQUEST_TAKE_PHOTO): File {
         // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val root = Environment.getExternalStorageDirectory().getPath().toString()
@@ -299,13 +298,27 @@ class MainActivity : AppCompatActivity() {
         } catch(e: Exception){
             System.out.println("---------> Beh sdasdas\n")
         }
+
         val context = this.applicationContext
         val toor = context.getExternalFilesDir(null).toString()
         val dir = File(toor + "/INSTA")
         val storageDir: File = dir //getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        var prefix = ""
+        var suffix = ""
+        when(kind) {
+            REQUEST_TAKE_PHOTO -> {
+                prefix = "JPEG_${timeStamp}_"
+                suffix = ".jpg"
+            }
+            REQUEST_VIDEO_CAPTURE -> {
+                prefix = "MP4_${timeStamp}_"
+                suffix = ".mp4"
+
+            }
+        }
         return File.createTempFile(
-            "JPEG_${timeStamp}_", /* prefix */
-            ".jpg", /* suffix */
+            prefix, /* prefix */
+            suffix, /* suffix */
             storageDir /* directory */
         ).apply {
             // Save a file: path for use with ACTION_VIEW intents
@@ -326,7 +339,7 @@ class MainActivity : AppCompatActivity() {
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
                 val photoFile: File? = try {
-                    createImageFile()
+                    createMediaFile()
                 } catch (ex: IOException) {
                     // Error occurred while creating the File
                     System.out.println(ex)
@@ -358,7 +371,7 @@ class MainActivity : AppCompatActivity() {
             takeVideoIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
                 val videoFile: File? = try {
-                    createImageFile()
+                    createMediaFile()
                 } catch (ex: IOException) {
                     // Error occurred while creating the File
                     System.out.println(ex)
@@ -371,9 +384,11 @@ class MainActivity : AppCompatActivity() {
                         "com.example.insta_android.fileprovider",
                         it
                     )
-                    photoUri = photoURI
                     takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE)
+                    currentMimeType = "video/mp4"
+                    currentPhotoPath = photoURI.path!!
+                    Log.i("CREATE", currentPhotoPath)
                     System.out.println("HEY INTENT")
                 }
             }
@@ -418,9 +433,10 @@ class MainActivity : AppCompatActivity() {
             image.setImageBitmap(bitmap)
         }else if(reqCode == REQUEST_TAKE_PHOTO) {
             setPic()
+
+            System.out.printf("file: %s \npath: %s\n", currentPhotoFilename, currentPhotoPath)
             var file = File(currentPhotoPath)
             var data = file.readBytes()
-            System.out.printf("file: %s \npath: %s\n", currentPhotoFilename, currentPhotoPath)
         }
     }
     public fun sendFile(){
