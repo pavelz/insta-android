@@ -232,8 +232,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if(currentPhotoPath != ""){
-            outState!!.putString("image_path", currentPhotoPath)
+        if(currentMediaPath != ""){
+            outState!!.putString("image_path", currentMediaPath)
             outState!!.putString("image_filename", currentPhotoFilename)
         }
     }
@@ -254,7 +254,7 @@ class MainActivity : AppCompatActivity() {
             if( path != null) {
                 var file = File(path)
                 var data = file.readBytes()
-                currentPhotoPath = path
+                currentMediaPath = path
                 currentPhotoFilename = savedInstanceState!!.getString("image_filename").toString()
             }
         }
@@ -262,7 +262,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if(currentPhotoPath != "") {
+        if(currentMediaPath != "") {
             //findViewById<View>(R.id.imageView2).post { setPic() }
             findViewById<View>(R.id.imageView2).viewTreeObserver.addOnGlobalLayoutListener { println(">>> LAYOUT CALLBACK"); setPic() }
         }
@@ -282,7 +282,7 @@ class MainActivity : AppCompatActivity() {
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
     }
-    var currentPhotoPath: String = ""
+    var currentMediaPath: String = ""
     var currentPhotoFilename: String = ""
     var currentPhotoUri:Uri? = null
     var currentMimeType:String = ""
@@ -324,7 +324,7 @@ class MainActivity : AppCompatActivity() {
             // Save a file: path for use with ACTION_VIEW intents
             System.out.printf("path: %s \n",absolutePath)
             currentPhotoFilename = absoluteFile.name
-            currentPhotoPath = absolutePath
+            currentMediaPath = absolutePath
         }
     }
 
@@ -339,7 +339,7 @@ class MainActivity : AppCompatActivity() {
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
                 val photoFile: File? = try {
-                    createMediaFile()
+                    createMediaFile(REQUEST_TAKE_PHOTO)
                 } catch (ex: IOException) {
                     // Error occurred while creating the File
                     System.out.println(ex)
@@ -371,7 +371,7 @@ class MainActivity : AppCompatActivity() {
             takeVideoIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
                 val videoFile: File? = try {
-                    createMediaFile()
+                    createMediaFile(REQUEST_VIDEO_CAPTURE)
                 } catch (ex: IOException) {
                     // Error occurred while creating the File
                     System.out.println(ex)
@@ -379,16 +379,16 @@ class MainActivity : AppCompatActivity() {
                 }
                 // Continue only if the File was successfully created
                 videoFile?.also {
-                    val photoURI: Uri = FileProvider.getUriForFile(
+                    val videoURI: Uri = FileProvider.getUriForFile(
                         this,
                         "com.example.insta_android.fileprovider",
                         it
                     )
-                    takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoURI)
                     startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE)
                     currentMimeType = "video/mp4"
-                    currentPhotoPath = photoURI.path!!
-                    Log.i("CREATE", currentPhotoPath)
+                    currentMediaPath = videoURI.path!!
+                    Log.i("CREATE", currentMediaPath)
                     System.out.println("HEY INTENT")
                 }
             }
@@ -401,7 +401,7 @@ class MainActivity : AppCompatActivity() {
         if(reqCode == PICK_IMAGE){
             println("PICK CODE!")
             println(data!!.data!!.path)
-            currentPhotoPath = data.data!!.path!!
+            currentMediaPath = data.data!!.path!!
             val url = data.data!!
             println(url.scheme)
             println(url.path)
@@ -434,8 +434,8 @@ class MainActivity : AppCompatActivity() {
         }else if(reqCode == REQUEST_TAKE_PHOTO) {
             setPic()
 
-            System.out.printf("file: %s \npath: %s\n", currentPhotoFilename, currentPhotoPath)
-            var file = File(currentPhotoPath)
+            System.out.printf("file: %s \npath: %s\n", currentPhotoFilename, currentMediaPath)
+            var file = File(currentMediaPath)
             var data = file.readBytes()
         }
     }
@@ -467,10 +467,10 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
+        BitmapFactory.decodeFile(currentMediaPath, bmOptions)?.also { bitmap ->
             //galleryAddPic()
 
-            var ex = ExifInterface(currentPhotoPath)
+            var ex = ExifInterface(currentMediaPath)
             var attr = ex.getAttribute(ExifInterface.TAG_ORIENTATION)!!.toInt()
             var rotatedBitmap:Bitmap = bitmap
             if(attr == 6){
@@ -524,12 +524,12 @@ class MainActivity : AppCompatActivity() {
         var email = prefs.getString("user_email","")
         var file:File? = null
 
-        println("CURRRENT PHOTO PATH: ${currentPhotoPath}")
+        println("CURRRENT PHOTO PATH: ${currentMediaPath}")
         var photoFile:File?
         if(currentImageInputStream != null){
             file = convertStreamToFile(currentImageInputStream!!)
         } else {
-            file = File(currentPhotoPath)
+            file = File(currentMediaPath)
         }
         var postUrl = ""
         var requestBody = MultipartBody.Builder()
@@ -578,7 +578,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun galleryAddPic() {
         Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
-            val f = File(currentPhotoPath)
+            val f = File(currentMediaPath)
             mediaScanIntent.data = Uri.fromFile(f)
             sendBroadcast(mediaScanIntent)
         }
