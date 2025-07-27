@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         if(currentMediaPath != ""){
             outState!!.putString("image_path", currentMediaPath)
-            outState!!.putString("image_filename", currentPhotoFilename)
+            outState!!.putString("image_filename", currentMediaFilename)
         }
     }
 
@@ -255,7 +255,7 @@ class MainActivity : AppCompatActivity() {
                 var file = File(path)
                 var data = file.readBytes()
                 currentMediaPath = path
-                currentPhotoFilename = savedInstanceState!!.getString("image_filename").toString()
+                currentMediaFilename = savedInstanceState!!.getString("image_filename").toString()
             }
         }
     }
@@ -283,7 +283,7 @@ class MainActivity : AppCompatActivity() {
         override fun onProviderDisabled(provider: String) {}
     }
     var currentMediaPath: String = ""
-    var currentPhotoFilename: String = ""
+    var currentMediaFilename: String = ""
     var currentPhotoUri:Uri? = null
     var currentMimeType:String = ""
 
@@ -316,6 +316,7 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
+
         return File.createTempFile(
             prefix, /* prefix */
             suffix, /* suffix */
@@ -323,13 +324,13 @@ class MainActivity : AppCompatActivity() {
         ).apply {
             // Save a file: path for use with ACTION_VIEW intents
             System.out.printf("path: %s \n",absolutePath)
-            currentPhotoFilename = absoluteFile.name
+            currentMediaFilename = absoluteFile.name
             currentMediaPath = absolutePath
         }
     }
 
     val REQUEST_TAKE_PHOTO = 1
-    val REQUEST_VIDEO_CAPTURE = 1
+    val REQUEST_VIDEO_CAPTURE = 3
     val PICK_IMAGE = 2
     var photoUri: Uri? = null
     private fun dispatchTakePictureIntent() {
@@ -385,9 +386,10 @@ class MainActivity : AppCompatActivity() {
                         it
                     )
                     takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoURI)
+                    takeVideoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
                     startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE)
                     currentMimeType = "video/mp4"
-                    currentMediaPath = videoURI.path!!
+                    currentMediaPath = videoFile.path!!
                     Log.i("CREATE", currentMediaPath)
                     System.out.println("HEY INTENT")
                 }
@@ -398,7 +400,7 @@ class MainActivity : AppCompatActivity() {
 
     public override fun onActivityResult(reqCode: Int, resCode: Int, data: Intent?){
         super.onActivityResult(reqCode, resCode, data)
-        if(reqCode == PICK_IMAGE){
+        if(reqCode == PICK_IMAGE) {
             println("PICK CODE!")
             println(data!!.data!!.path)
             currentMediaPath = data.data!!.path!!
@@ -409,8 +411,9 @@ class MainActivity : AppCompatActivity() {
 
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, url)
             val image = findViewById<ImageView>(R.id.imageView2)
-            val proj:Array<out String> = arrayOf(MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME )
-            val cursor = contentResolver.query(url, proj,null, null, null)
+            val proj: Array<out String> =
+                arrayOf(MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME)
+            val cursor = contentResolver.query(url, proj, null, null, null)
             println(contentResolver.getType(url))
             currentMimeType = contentResolver.getType(url)!!
 
@@ -419,22 +422,24 @@ class MainActivity : AppCompatActivity() {
             currentImageInputStream = context!!.contentResolver.openInputStream(data.data!!)
 
 
-            if(cursor.moveToFirst()){
+            if (cursor.moveToFirst()) {
                 println("FOUND SOMETHING!!")
                 println(cursor.getString(index))
-                currentPhotoFilename = cursor.getString(index)
+                currentMediaFilename = cursor.getString(index)
 
-                if(cursor.getString(index) == null) {
+                if (cursor.getString(index) == null) {
                     // its a file ?
 
                 }
             }
 
             image.setImageBitmap(bitmap)
+        }else if(reqCode == REQUEST_VIDEO_CAPTURE){
+            // set video view looping in the preview
         }else if(reqCode == REQUEST_TAKE_PHOTO) {
             setPic()
 
-            System.out.printf("file: %s \npath: %s\n", currentPhotoFilename, currentMediaPath)
+            System.out.printf("file: %s \npath: %s\n", currentMediaFilename, currentMediaPath)
             var file = File(currentMediaPath)
             var data = file.readBytes()
         }
@@ -516,7 +521,7 @@ class MainActivity : AppCompatActivity() {
     var toSend = false
     @Throws(IOException::class)
     fun sendPhotoVideo(){
-        println("SEND PHOTO")
+        println("SEND MEDIA")
         if(toSend != true) { return }
 
         var prefs = applicationContext.getSharedPreferences("insta", Context.MODE_PRIVATE)
@@ -524,8 +529,7 @@ class MainActivity : AppCompatActivity() {
         var email = prefs.getString("user_email","")
         var file:File? = null
 
-        println("CURRRENT PHOTO PATH: ${currentMediaPath}")
-        var photoFile:File?
+        println("CURRRENT MEDIA PATH: ${currentMediaPath}")
         if(currentImageInputStream != null){
             file = convertStreamToFile(currentImageInputStream!!)
         } else {
@@ -538,18 +542,18 @@ class MainActivity : AppCompatActivity() {
             .addFormDataPart("user_token", token.toString())
 
         if(currentMimeType == "video/mp4") {
-           requestBody.addFormDataPart("video[name]", currentPhotoFilename)
+           requestBody.addFormDataPart("video[name]", currentMediaFilename)
                 .addFormDataPart(
-                    "video[video]", currentPhotoFilename,
+                    "video[video]", currentMediaFilename,
                     file!!.asRequestBody(MEDIA_TYPE_MP4)
                 )
             postUrl = "/videos"
         }
 
         if(currentMimeType == "image/jpeg") {
-           requestBody.addFormDataPart("photo[name]", currentPhotoFilename)
+           requestBody.addFormDataPart("photo[name]", currentMediaFilename)
                 .addFormDataPart(
-                    "photo[image]", currentPhotoFilename,
+                    "photo[image]", currentMediaFilename,
                     file!!.asRequestBody(MEDIA_TYPE_JPEG)
                 )
             postUrl = "/photos"
