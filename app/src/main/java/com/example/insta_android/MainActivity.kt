@@ -436,6 +436,7 @@ class MainActivity : AppCompatActivity() {
             image.setImageBitmap(bitmap)
         }else if(reqCode == REQUEST_VIDEO_CAPTURE){
             // set video view looping in the preview
+            setVid()
         }else if(reqCode == REQUEST_TAKE_PHOTO) {
             setPic()
 
@@ -446,6 +447,14 @@ class MainActivity : AppCompatActivity() {
     }
     public fun sendFile(){
         sendPhotoVideo()
+    }
+    private fun setVid(){
+        val videoView: ImageView = findViewById<ImageView>(R.id.videoView)
+        val imageView: ImageView = findViewById<ImageView>(R.id.imageView2)
+        imageView.visibility = View.GONE
+        videoView.visibility = View.VISIBLE
+
+        // set video file content url to video just recorded
     }
 
     private fun setPic() {
