@@ -6,7 +6,7 @@
         <variable name="foo" type="int"/>
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:accessibilityHeading="false"
@@ -14,21 +14,8 @@
         tools:context=".MainActivity"
         tools:showIn="@layout/activity_main">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/imageView2"
-            android:layout_width="356dp"
-            android:layout_height="497dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="90dp"
-            android:background="#3F51B5"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/videoView"
             android:layout_width="356dp"
             android:layout_height="497dp"
             android:layout_marginStart="32dp"
@@ -41,5 +28,10 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <VideoView
+            android:id="@+id/videoView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_centerInParent="true"/>
+
+    </RelativeLayout>
 </layout>

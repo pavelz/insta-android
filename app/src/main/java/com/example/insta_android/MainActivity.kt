@@ -2,51 +2,56 @@ package com.example.insta_android
 
 import android.Manifest
 import android.content.Context
-import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Environment
-import android.provider.MediaStore
-import androidx.core.content.FileProvider
-
-import java.text.SimpleDateFormat
-import java.util.*
-
-import android.graphics.BitmapFactory
-import android.widget.ImageView
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import androidx.exifinterface.media.ExifInterface
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.Bundle
+import android.os.Environment
 import android.os.StrictMode
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import android.provider.MediaStore
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
+import android.widget.MediaController
+import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
 import com.example.insta_android.Config.Code.context
 import com.example.insta_android.data.LoginDataSource
 import com.example.insta_android.databinding.ActivityMainBinding
 import com.example.insta_android.ui.login.LoginActivity
-
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.*
-import java.lang.Exception
-import java.nio.charset.Charset
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import com.squareup.moshi.JsonAdapter
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
 import org.apache.commons.io.IOUtils
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.text.SimpleDateFormat
+import java.util.Date
 
 
 class MainActivity : AppCompatActivity() {
@@ -264,7 +269,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         if(currentMediaPath != "") {
             //findViewById<View>(R.id.imageView2).post { setPic() }
-            findViewById<View>(R.id.imageView2).viewTreeObserver.addOnGlobalLayoutListener { println(">>> LAYOUT CALLBACK"); setPic() }
+            findViewById<View>(R.id.imageView2).viewTreeObserver.addOnGlobalLayoutListener { println(">>> LAYOUT CALLBACK"); setPic(); }
         }
     }
     var lat: Double = 0.0
@@ -449,15 +454,38 @@ class MainActivity : AppCompatActivity() {
         sendPhotoVideo()
     }
     private fun setVid(){
-        val videoView: ImageView = findViewById<ImageView>(R.id.videoView)
+        if(currentMimeType != "video/mp4") return;
+        val videoView: VideoView = findViewById<VideoView>(R.id.videoView)
         val imageView: ImageView = findViewById<ImageView>(R.id.imageView2)
+
+        videoView.setOnErrorListener { mp, what, extra ->
+            Log.e("VideoView",
+                "Error! what=$what extra=$extra",
+                RuntimeException("VideoView decode failed"))
+            false  // let the system try its fallback path too
+        }
+        // set video file content url to video just recorded
+        val file = File(currentMediaPath)
+        val uRI = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        videoView.setVideoURI(uRI)
+        videoView.requestFocus()
         imageView.visibility = View.GONE
         videoView.visibility = View.VISIBLE
 
-        // set video file content url to video just recorded
+        videoView.setOnErrorListener(MediaPlayer.OnErrorListener { mp: MediaPlayer?, what: Int, extra: Int ->
+            Log.e("VideoView", "Error! what=" + what + " extra=" + extra)
+            true // we handled it
+        })
+        videoView.setOnPreparedListener { mediaPlayer ->
+            var layout = videoView.layoutParams
+            layout.height = mediaPlayer.videoHeight
+            videoView.layoutParams = layout
+            mediaPlayer.isLooping = true
+            videoView.start()
+        }
     }
-
     private fun setPic() {
+        if(currentMimeType != "image/jpeg") return;
         // Get the dimensions of the View
         val imageView: ImageView =  findViewById(R.id.imageView2)
         val targetW: Int = imageView.width
