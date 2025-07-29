@@ -36,7 +36,7 @@ class PhotoViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(LayoutInflater
 
         if(photoVideo!!.className == "Video"){
             Log.i("CREATE", "Trying to load video: ${photoVideo!!.fileName}")
-                Log.i(">>>> VIDEO", photoVideo.toString())
+            Log.i(">>>> VIDEO", photoVideo.toString())
             //videoView.setVideoPath(root + "/INSTA/" + photoVideo!!.fileName!!)
             val uri = Uri.parse(Config.serverURL() +  photoVideo!!.url)
             videoView.setVideoURI(uri)
