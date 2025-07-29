@@ -407,6 +407,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(reqCode, resCode, data)
         if(reqCode == PICK_IMAGE) {
             println("PICK CODE!")
+            if(data == null || data!!.data == null || data!!.data!!.path == null) return; // if action dismissed it will bail
             println(data!!.data!!.path)
             currentMediaPath = data.data!!.path!!
             val url = data.data!!

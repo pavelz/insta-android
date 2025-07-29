@@ -22,7 +22,6 @@
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="90dp"
             android:background="#3F51B5"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -31,6 +30,7 @@
         <VideoView
             android:id="@+id/videoView"
             android:layout_width="match_parent"
+            android:visibility="gone"
             android:layout_height="wrap_content" android:layout_centerInParent="true"/>
 
     </RelativeLayout>
